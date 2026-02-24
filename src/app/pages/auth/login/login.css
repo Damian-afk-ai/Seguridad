@@ -13,3 +13,21 @@ form {
     display: flex;
     flex-direction: column;
 }
+
+.credentials-hint {
+    margin-top: 15px;
+    text-align: center;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.credentials-hint i {
+    font-size: 0.85rem;
+}
+
+.credentials-hint small {
+    font-size: 0.8rem;
+}

@@ -4,7 +4,7 @@ Aplicación web frontend desarrollada con **Angular 21** y **PrimeNG 21** como p
 
 ## 📋 Descripción General
 
-Este proyecto se ha desarrollado de forma incremental a lo largo de múltiples prácticas. Comenzó como una configuración inicial del entorno de desarrollo (Práctica 1) y ha evolucionado hasta convertirse en una SPA con sistema de autenticación (Práctica 2).
+Este proyecto se ha desarrollado de forma incremental a lo largo de múltiples prácticas. Comenzó como una configuración inicial del entorno de desarrollo (Práctica 1), evolucionó a una SPA con sistema de autenticación (Práctica 2), y se extendió con validación de credenciales hardcodeadas y formulario de registro con validaciones avanzadas (Práctica 3).
 
 ---
 
@@ -225,8 +225,133 @@ La configuración se actualizó en `app.config.ts` para incluir:
 
 ## 📌 Notas (Práctica 2)
 
-- Los formularios actualmente solo imprimen los valores en consola (`console.log`). No hay integración con un backend ni validaciones avanzadas.
 - Los módulos `AuthModule` y `PagesModule` están creados pero vacíos, ya que los componentes son **standalone** y no requieren declaración en un NgModule.
+
+---
+
+# Práctica 3 — Validación de Credenciales y Formulario de Registro
+
+## 📋 Descripción
+
+En esta tercera práctica se implementó la validación de credenciales en el **Login** utilizando datos hardcodeados en el código, y se reconstruyó completamente el formulario de **Registro** con validaciones exhaustivas en cada campo. Se utilizan componentes de **PrimeNG** (Toast, DatePicker, Password, etc.) para ofrecer una experiencia de usuario profesional con alertas y mensajes de error en tiempo real.
+
+## 🎯 Objetivos
+
+1. Establecer credenciales hardcodeadas en el código para validar el login desde la interfaz.
+2. Validar todos los campos del formulario de registro para no aceptar campos vacíos.
+3. Implementar validación de contraseña con al menos 10 caracteres y símbolos especiales definidos.
+4. Permitir solo el registro a mayores de edad (≥ 18 años).
+5. Validar que el número de teléfono contenga solo números.
+6. Utilizar componentes UI de PrimeNG para validaciones y alertas UX.
+
+## 🔐 Login — Credenciales Hardcodeadas
+
+Las credenciales de autenticación están definidas directamente en el código del componente `Login`:
+
+| Campo | Valor |
+|---|---|
+| **Email** | `admin@correo.com` |
+| **Contraseña** | `Seguridad1!` |
+
+### Comportamiento del Login:
+- **Campos vacíos** → Toast de advertencia (severity `warn`): *"Por favor ingrese email y contraseña."*
+- **Credenciales incorrectas** → Toast de error (severity `error`): *"Credenciales incorrectas. Intente de nuevo."*
+- **Credenciales correctas** → Toast de éxito (severity `success`): *"Inicio de sesión exitoso."* y redirección al Landing después de 1.5 segundos.
+
+### Implementación técnica:
+- Las credenciales se almacenan como constantes `private readonly` en la clase `Login` (`login.ts`, líneas 33-34).
+- La validación se realiza con comparación directa de strings en el método `login()`.
+- Se utiliza `MessageService` de PrimeNG para las notificaciones Toast.
+- Se utiliza `Router` de Angular para la redirección después del login exitoso.
+
+## 📝 Registro — Formulario con Validaciones
+
+El formulario de registro fue reconstruido utilizando **ReactiveFormsModule** (formularios reactivos de Angular) en lugar del anterior approach con `FormsModule`/`ngModel`, para permitir validaciones avanzadas.
+
+### Campos del formulario:
+
+| Campo | Tipo de Componente | Validaciones |
+|---|---|---|
+| **Usuario** | `pInputText` + `p-floatlabel` | Requerido, mínimo 3 caracteres |
+| **Correo Electrónico** | `pInputText` + `p-floatlabel` | Requerido, formato email válido (`Validators.email`) |
+| **Contraseña** | `p-password` + `p-floatlabel` | Requerido, mínimo 10 caracteres, debe contener: mayúscula, minúscula, número y símbolo especial |
+| **Confirmar Contraseña** | `p-password` + `p-floatlabel` | Requerido, debe coincidir con la contraseña (validador cruzado) |
+| **Nombre Completo** | `pInputText` + `p-floatlabel` | Requerido, mínimo 3 caracteres |
+| **Teléfono** | `pInputText` + `p-floatlabel` | Requerido, solo números (`pattern: /^\d+$/`), mínimo 10 dígitos |
+| **Fecha de Nacimiento** | `p-datepicker` + `p-floatlabel` | Requerido, mayor de 18 años (validador personalizado + `maxDate`) |
+| **Dirección** | `pInputText` + `p-floatlabel` | Requerido, mínimo 5 caracteres |
+
+### Validación de Contraseña — Símbolos Especiales Definidos
+
+La contraseña debe cumplir **todas** estas reglas simultáneamente:
+
+1. Mínimo **10 caracteres** de longitud.
+2. Al menos una **letra mayúscula** (A-Z).
+3. Al menos una **letra minúscula** (a-z).
+4. Al menos un **número** (0-9).
+5. Al menos un **símbolo especial** de los siguientes: `!@#$%^&*()_+-=`
+
+El validador personalizado `passwordStrengthValidator` verifica cada regla de forma independiente y muestra mensajes de error específicos para cada una que no se cumpla.
+
+### Validación de Mayoría de Edad
+
+- Se utiliza un componente `p-datepicker` de PrimeNG con la propiedad `[maxDate]` configurada a la fecha actual menos 18 años, lo que impide seleccionar fechas que resulten en una edad menor.
+- Adicionalmente, un validador personalizado `ageValidator` calcula la edad exacta y retorna un error `underage` si el usuario tiene menos de 18 años.
+
+### Validación de Teléfono
+
+- Se utiliza `Validators.pattern(/^\d+$/)` para asegurar que el campo solo contenga dígitos numéricos.
+- Se requiere un mínimo de 10 dígitos (`Validators.minLength(10)`).
+- El campo tiene un `maxlength="15"` en el HTML para limitar la entrada.
+
+### Botón de Registro
+
+- El botón **"Registrarse"** está **deshabilitado** (`[disabled]="registerForm.invalid"`) mientras el formulario tenga errores de validación.
+- Solo se habilita cuando **todos** los campos son válidos.
+
+### Validadores Personalizados Implementados
+
+| Validador | Tipo | Descripción |
+|---|---|---|
+| `passwordStrengthValidator` | Campo | Verifica mayúscula, minúscula, número y símbolo especial |
+| `passwordMatchValidator` | Formulario (cruzado) | Verifica que contraseña y confirmación coincidan |
+| `ageValidator` | Campo | Calcula la edad y verifica que sea ≥ 18 años |
+
+## 🧩 Componentes PrimeNG Utilizados (Práctica 3)
+
+| Componente | Módulo | Uso |
+|---|---|---|
+| `p-toast` | `ToastModule` | Notificaciones emergentes de éxito, error y advertencia |
+| `p-card` | `CardModule` | Contenedor visual del formulario |
+| `p-floatlabel` | `FloatLabelModule` | Labels flotantes en cada campo de entrada |
+| `p-password` | `PasswordModule` | Campos de contraseña con toggle de visibilidad |
+| `p-button` | `ButtonModule` | Botones con íconos (pi pi-sign-in, pi pi-user-plus) |
+| `p-datepicker` | `DatePickerModule` | Selector de fecha de nacimiento con restricción de edad |
+| `pInputText` | `InputTextModule` | Inputs de texto estilizados |
+| Clase `p-error` | (PrimeNG CSS) | Estilo rojo para mensajes de error inline |
+
+## 📝 Resumen de lo Implementado (Práctica 3)
+
+1. ✅ Credenciales hardcodeadas en el componente Login (`admin@correo.com` / `Seguridad1!`)
+2. ✅ Validación de login con feedback visual mediante PrimeNG Toast (warn, error, success)
+3. ✅ Redirección al Landing tras login exitoso con `Router`
+4. ✅ Formulario de registro reconstruido con `ReactiveFormsModule`
+5. ✅ Todos los campos requeridos (no se aceptan campos vacíos)
+6. ✅ Contraseña con mínimo 10 caracteres y símbolos especiales definidos (`!@#$%^&*()_+-=`)
+7. ✅ Validación de mayoría de edad (≥ 18 años) con `p-datepicker` y validador personalizado
+8. ✅ Teléfono validado para solo aceptar números con mínimo 10 dígitos
+9. ✅ Confirmación de contraseña con validador cruzado
+10. ✅ Botón de registro deshabilitado hasta que todos los campos sean válidos
+11. ✅ Mensajes de error inline específicos por campo con clase `p-error` de PrimeNG
+12. ✅ Toast de error al intentar enviar formulario inválido
+13. ✅ Toast de éxito al registrarse correctamente
+
+## 📌 Notas (Práctica 3)
+
+- El login utiliza credenciales hardcodeadas (**no** hay integración con backend ni base de datos).
+- El registro muestra un Toast de éxito y registra los datos en consola, pero **no** persiste la información.
+- Se migró el formulario de registro de `FormsModule` (template-driven) a `ReactiveFormsModule` (reactive forms) para soportar validaciones complejas.
+- El login se mantuvo con `FormsModule`/`ngModel` por simplicidad, ya que solo tiene 2 campos sin validaciones complejas.
 
 ---
 

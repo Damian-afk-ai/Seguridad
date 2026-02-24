@@ -1,26 +1,160 @@
+<p-toast />
 <div class="register-container">
-    <p-card header="Registro">
-        <form (ngSubmit)="register()">
+    <p-card header="Registro de Usuario">
+        <form [formGroup]="registerForm" (ngSubmit)="register()">
+
+            <!-- Usuario -->
             <div class="form-group">
                 <p-floatlabel>
-                    <input pInputText id="nombre" [(ngModel)]="nombre" name="nombre" />
-                    <label for="nombre">Nombre</label>
+                    <input pInputText id="usuario" formControlName="usuario" />
+                    <label for="usuario">Usuario</label>
                 </p-floatlabel>
+                <div *ngIf="isInvalid('usuario')" class="error-messages">
+                    <small *ngIf="f['usuario'].errors?.['required']" class="p-error">
+                        El usuario es obligatorio.
+                    </small>
+                    <small *ngIf="f['usuario'].errors?.['minlength']" class="p-error">
+                        Debe tener al menos 3 caracteres.
+                    </small>
+                </div>
             </div>
+
+            <!-- Email -->
             <div class="form-group">
                 <p-floatlabel>
-                    <input pInputText id="email" [(ngModel)]="email" name="email" />
-                    <label for="email">Email</label>
+                    <input pInputText id="reg-email" formControlName="email" />
+                    <label for="reg-email">Correo Electrónico</label>
                 </p-floatlabel>
+                <div *ngIf="isInvalid('email')" class="error-messages">
+                    <small *ngIf="f['email'].errors?.['required']" class="p-error">
+                        El correo es obligatorio.
+                    </small>
+                    <small *ngIf="f['email'].errors?.['email']" class="p-error">
+                        Ingrese un correo electrónico válido.
+                    </small>
+                </div>
             </div>
+
+            <!-- Contraseña -->
             <div class="form-group">
                 <p-floatlabel>
-                    <p-password id="password" [(ngModel)]="password" name="password" [feedback]="false"
-                        [toggleMask]="true" />
-                    <label for="password">Password</label>
+                    <p-password id="reg-password" formControlName="password" [toggleMask]="true" [feedback]="false" />
+                    <label for="reg-password">Contraseña</label>
                 </p-floatlabel>
+                <div *ngIf="isInvalid('password')" class="error-messages">
+                    <small *ngIf="f['password'].errors?.['required']" class="p-error">
+                        La contraseña es obligatoria.
+                    </small>
+                    <small *ngIf="f['password'].errors?.['minlength']" class="p-error">
+                        Debe tener al menos 10 caracteres.
+                    </small>
+                    <small *ngIf="f['password'].errors?.['noUpperCase']" class="p-error">
+                        Debe contener al menos una letra mayúscula.
+                    </small>
+                    <small *ngIf="f['password'].errors?.['noLowerCase']" class="p-error">
+                        Debe contener al menos una letra minúscula.
+                    </small>
+                    <small *ngIf="f['password'].errors?.['noNumber']" class="p-error">
+                        Debe contener al menos un número.
+                    </small>
+                    <small *ngIf="f['password'].errors?.['noSpecialChar']" class="p-error">
+                        Debe contener al menos un símbolo especial (!&#64;#$%^&*()_+-=).
+                    </small>
+                </div>
             </div>
-            <p-button type="submit" label="Registrarse" />
+
+            <!-- Confirmar Contraseña -->
+            <div class="form-group">
+                <p-floatlabel>
+                    <p-password id="confirmPassword" formControlName="confirmPassword" [toggleMask]="true"
+                        [feedback]="false" />
+                    <label for="confirmPassword">Confirmar Contraseña</label>
+                </p-floatlabel>
+                <div class="error-messages">
+                    <small *ngIf="f['confirmPassword'].touched && f['confirmPassword'].errors?.['required']"
+                        class="p-error">
+                        Confirme su contraseña.
+                    </small>
+                    <small
+                        *ngIf="f['confirmPassword'].touched && !f['confirmPassword'].errors?.['required'] && registerForm.hasError('passwordMismatch')"
+                        class="p-error">
+                        Las contraseñas no coinciden.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Nombre Completo -->
+            <div class="form-group">
+                <p-floatlabel>
+                    <input pInputText id="nombreCompleto" formControlName="nombreCompleto" />
+                    <label for="nombreCompleto">Nombre Completo</label>
+                </p-floatlabel>
+                <div *ngIf="isInvalid('nombreCompleto')" class="error-messages">
+                    <small *ngIf="f['nombreCompleto'].errors?.['required']" class="p-error">
+                        El nombre completo es obligatorio.
+                    </small>
+                    <small *ngIf="f['nombreCompleto'].errors?.['minlength']" class="p-error">
+                        Debe tener al menos 3 caracteres.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="form-group">
+                <p-floatlabel>
+                    <input pInputText id="telefono" formControlName="telefono" maxlength="15" />
+                    <label for="telefono">Teléfono (solo números)</label>
+                </p-floatlabel>
+                <div *ngIf="isInvalid('telefono')" class="error-messages">
+                    <small *ngIf="f['telefono'].errors?.['required']" class="p-error">
+                        El teléfono es obligatorio.
+                    </small>
+                    <small *ngIf="f['telefono'].errors?.['pattern']" class="p-error">
+                        Solo se permiten números.
+                    </small>
+                    <small *ngIf="f['telefono'].errors?.['minlength'] && !f['telefono'].errors?.['pattern']"
+                        class="p-error">
+                        Debe tener al menos 10 dígitos.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Fecha de Nacimiento -->
+            <div class="form-group">
+                <p-floatlabel>
+                    <p-datepicker id="fechaNacimiento" formControlName="fechaNacimiento" [maxDate]="maxDate"
+                        dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" />
+                    <label for="fechaNacimiento">Fecha de Nacimiento</label>
+                </p-floatlabel>
+                <div *ngIf="isInvalid('fechaNacimiento')" class="error-messages">
+                    <small *ngIf="f['fechaNacimiento'].errors?.['required']" class="p-error">
+                        La fecha de nacimiento es obligatoria.
+                    </small>
+                    <small *ngIf="f['fechaNacimiento'].errors?.['underage']" class="p-error">
+                        Debe ser mayor de 18 años para registrarse.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Dirección -->
+            <div class="form-group">
+                <p-floatlabel>
+                    <input pInputText id="direccion" formControlName="direccion" />
+                    <label for="direccion">Dirección</label>
+                </p-floatlabel>
+                <div *ngIf="isInvalid('direccion')" class="error-messages">
+                    <small *ngIf="f['direccion'].errors?.['required']" class="p-error">
+                        La dirección es obligatoria.
+                    </small>
+                    <small *ngIf="f['direccion'].errors?.['minlength']" class="p-error">
+                        Debe tener al menos 5 caracteres.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Botón Registro (deshabilitado si el formulario es inválido) -->
+            <p-button type="submit" label="Registrarse" icon="pi pi-user-plus" [disabled]="registerForm.invalid" />
+
         </form>
     </p-card>
 </div>
