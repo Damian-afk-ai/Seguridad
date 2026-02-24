@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "proyecto-angular": {
+    "practica2": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -57,10 +57,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "proyecto-angular:build:production"
+              "buildTarget": "practica2:build:production"
             },
             "development": {
-              "buildTarget": "proyecto-angular:build:development"
+              "buildTarget": "practica2:build:development"
             }
           },
           "defaultConfiguration": "development"
