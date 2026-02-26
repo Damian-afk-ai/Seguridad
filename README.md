@@ -4,7 +4,7 @@ Aplicación web frontend desarrollada con **Angular 21** y **PrimeNG 21** como p
 
 ## 📋 Descripción General
 
-Este proyecto se ha desarrollado de forma incremental a lo largo de múltiples prácticas. Comenzó como una configuración inicial del entorno de desarrollo (Práctica 1), evolucionó a una SPA con sistema de autenticación (Práctica 2), y se extendió con validación de credenciales hardcodeadas y formulario de registro con validaciones avanzadas (Práctica 3).
+Este proyecto se ha desarrollado de forma incremental a lo largo de múltiples prácticas. Comenzó como una configuración inicial del entorno de desarrollo (Práctica 1), evolucionó a una SPA con sistema de autenticación (Práctica 2), se extendió con validación de credenciales hardcodeadas y formulario de registro con validaciones avanzadas (Práctica 3), y finalmente se implementó una estructura de layout con Sidebar de navegación, página Home y personalización del tema visual con la paleta Teal (Práctica 4).
 
 ---
 
@@ -16,7 +16,7 @@ Este proyecto se ha desarrollado de forma incremental a lo largo de múltiples p
 | **TypeScript** | ~5.9.2 | Lenguaje de programación tipado |
 | **PrimeNG** | 21.1.1 | Librería de componentes UI para Angular |
 | **PrimeIcons** | 7.0.0 | Set de íconos complementario de PrimeNG |
-| **@primeng/themes (Aura)** | 21.0.4 | Tema visual aplicado a los componentes |
+| **@primeuix/themes (Aura + Teal)** | 21.0.4 | Tema visual Aura personalizado con paleta Teal |
 | **RxJS** | ~7.8.0 | Librería para programación reactiva |
 | **Vitest** | 4.0.8 | Framework de testing unitario |
 | **Angular CLI** | 21.1.4 | Herramienta de línea de comandos para Angular |
@@ -229,11 +229,11 @@ La configuración se actualizó en `app.config.ts` para incluir:
 
 ---
 
-# Práctica 3 — Validación de Credenciales y Formulario de Registro
+# Práctica 3 Actualizada — Validación de Credenciales y Formulario de Registro
 
 ## 📋 Descripción
 
-En esta tercera práctica se implementó la validación de credenciales en el **Login** utilizando datos hardcodeados en el código, y se reconstruyó completamente el formulario de **Registro** con validaciones exhaustivas en cada campo. Se utilizan componentes de **PrimeNG** (Toast, DatePicker, Password, etc.) para ofrecer una experiencia de usuario profesional con alertas y mensajes de error en tiempo real.
+En esta tercera práctica (recientemente actualizada con correcciones menores en validaciones de formulario y helpers de UI) se implementó la validación de credenciales en el **Login** utilizando datos hardcodeados en el código, y se reconstruyó completamente el formulario de **Registro** con validaciones exhaustivas en cada campo. Se utilizan componentes de **PrimeNG** (Toast, DatePicker, Password, etc.) y **Sileo Notifications** para ofrecer una experiencia de usuario profesional con alertas y mensajes de error en tiempo real.
 
 ## 🎯 Objetivos
 
@@ -256,7 +256,7 @@ Las credenciales de autenticación están definidas directamente en el código d
 ### Comportamiento del Login:
 - **Campos vacíos** → Toast de advertencia (severity `warn`): *"Por favor ingrese email y contraseña."*
 - **Credenciales incorrectas** → Toast de error (severity `error`): *"Credenciales incorrectas. Intente de nuevo."*
-- **Credenciales correctas** → Toast de éxito (severity `success`): *"Inicio de sesión exitoso."* y redirección al Landing después de 1.5 segundos.
+- **Credenciales correctas** → Toast de éxito (severity `success`): *"Inicio de sesión exitoso."* y redirección a `/home` después de 1.5 segundos.
 
 ### Implementación técnica:
 - Las credenciales se almacenan como constantes `private readonly` en la clase `Login` (`login.ts`, líneas 33-34).
@@ -301,8 +301,8 @@ El validador personalizado `passwordStrengthValidator` verifica cada regla de fo
 ### Validación de Teléfono
 
 - Se utiliza `Validators.pattern(/^\d+$/)` para asegurar que el campo solo contenga dígitos numéricos.
-- Se requiere un mínimo de 10 dígitos (`Validators.minLength(10)`).
-- El campo tiene un `maxlength="15"` en el HTML para limitar la entrada.
+- Se requiere exactamente 10 dígitos (`Validators.minLength(10)` y `Validators.maxLength(10)`).
+- El campo tiene un `maxlength="10"` en el HTML para limitar la entrada a 10 caracteres.
 
 ### Botón de Registro
 
@@ -339,7 +339,7 @@ El validador personalizado `passwordStrengthValidator` verifica cada regla de fo
 5. ✅ Todos los campos requeridos (no se aceptan campos vacíos)
 6. ✅ Contraseña con mínimo 10 caracteres y símbolos especiales definidos (`!@#$%^&*()_+-=`)
 7. ✅ Validación de mayoría de edad (≥ 18 años) con `p-datepicker` y validador personalizado
-8. ✅ Teléfono validado para solo aceptar números con mínimo 10 dígitos
+8. ✅ Teléfono validado para solo aceptar exactamente 10 números
 9. ✅ Confirmación de contraseña con validador cruzado
 10. ✅ Botón de registro deshabilitado hasta que todos los campos sean válidos
 11. ✅ Mensajes de error inline específicos por campo con clase `p-error` de PrimeNG
@@ -352,6 +352,183 @@ El validador personalizado `passwordStrengthValidator` verifica cada regla de fo
 - El registro muestra un Toast de éxito y registra los datos en consola, pero **no** persiste la información.
 - Se migró el formulario de registro de `FormsModule` (template-driven) a `ReactiveFormsModule` (reactive forms) para soportar validaciones complejas.
 - El login se mantuvo con `FormsModule`/`ngModel` por simplicidad, ya que solo tiene 2 campos sin validaciones complejas.
+
+---
+
+# Práctica 4 — Layout con Sidebar, Página Home y Personalización del Tema
+
+## 📋 Descripción
+
+En esta cuarta práctica se implementó la estructura de layout de la aplicación siguiendo los lineamientos del pizarrón de clase. Se creó un **MainLayout** que integra un **Sidebar** de navegación como menú lateral, una página **Home** como panel principal, y se personalizó el tema visual de PrimeNG con la paleta de colores **Teal**. Además, se actualizó el flujo de autenticación para redirigir al Home tras el login exitoso, se integraron los **PrimeIcons** globalmente, y se aplicó la variante **On Label** en los Float Labels de los formularios.
+
+## 🎯 Objetivos
+
+1. Crear una estructura de layout con Sidebar como menú de navegación.
+2. Implementar un MainLayout que envuelva las páginas protegidas.
+3. Crear una página Home limpia como panel de control principal.
+4. Redirigir al Home después del login exitoso.
+5. Personalizar el tema de PrimeNG con la paleta Teal.
+6. Integrar PrimeIcons en toda la aplicación.
+7. Aplicar la variante On Label (`variant="on"`) en los Float Labels.
+8. Asegurar una interfaz con buena UX: estilizada y sin desorden.
+
+## 📁 Estructura del Proyecto (Práctica 4)
+
+```
+src/app/
+├── app.ts                       # Componente raíz con RouterOutlet
+├── app.html                     # Template del componente raíz
+├── app.css                      # Estilos del componente raíz
+├── app.config.ts                # Configuración (Router, PrimeNG con Teal)
+├── app.routes.ts                # Rutas actualizadas con /home y MainLayout
+├── app.spec.ts                  # Tests del componente raíz
+├── components/                  # ← NUEVO: Carpeta de componentes reutilizables
+│   └── sidebar/
+│       ├── sidebar.ts           # Componente Sidebar con navegación
+│       ├── sidebar.html         # Template del Sidebar (menú, logout)
+│       └── sidebar.css          # Estilos del Sidebar (tema dark teal)
+├── layout/                      # ← NUEVO: Carpeta de layouts
+│   └── main-layout/
+│       ├── main-layout.ts       # Layout principal (Sidebar + contenido)
+│       ├── main-layout.html     # Template del layout (sidebar + router-outlet)
+│       └── main-layout.css      # Estilos del layout (flexbox)
+└── pages/
+    ├── pages-module.ts
+    ├── home/                    # ← NUEVO: Página Home
+    │   ├── home.ts              # Componente Home (limpio, solo bienvenida)
+    │   ├── home.html            # Template del Home ("Bienvenido")
+    │   └── home.css             # Estilos del Home
+    ├── landing/
+    │   └── ...                  # (sin cambios)
+    └── auth/
+        ├── login/
+        │   └── ...              # (actualizado: redirect a /home, botón teal 900, On Label)
+        └── register/
+            └── ...              # (actualizado: On Label en todos los campos)
+```
+
+## 🧩 Componentes Implementados (Práctica 4)
+
+### 1. `Sidebar` (Componente de Navegación)
+- **Archivo:** `src/app/components/sidebar/sidebar.ts`
+- **Selector:** `app-sidebar`
+- Sidebar lateral oscuro con tema **dark teal** que incluye:
+  - **Header** con ícono `pi pi-bullseye` y título "Practica 4"
+  - **Botón toggle** para colapsar/expandir el sidebar
+  - **Menú de navegación** con ícono de Inicio (`pi pi-home`)
+  - **Footer** con botón de "Cerrar sesión" (`pi pi-sign-out`) que redirige a `/login`
+- Soporta **tooltips** (PrimeNG `pTooltip`) cuando está colapsado
+- Utiliza `RouterLink` y `RouterLinkActive` para resaltar la ruta activa
+- Animación suave de transición al colapsar (CSS `cubic-bezier`)
+
+### 2. `MainLayout` (Layout Principal)
+- **Archivo:** `src/app/layout/main-layout/main-layout.ts`
+- **Selector:** `app-main-layout`
+- Layout que combina el `Sidebar` a la izquierda con un área de contenido a la derecha
+- Utiliza `<router-outlet>` para renderizar las páginas hijas (como Home)
+- Implementado con **flexbox** y margen izquierdo de 260px para el sidebar
+
+### 3. `Home` (Página Principal)
+- **Archivo:** `src/app/pages/home/home.ts`
+- **Selector:** `app-home`
+- **Ruta:** `/home` (hijo de MainLayout)
+- Página limpia que muestra únicamente el texto **"Bienvenido"** centrado
+- Diseñada como panel de control minimalista, lista para extenderse con contenido futuro
+
+## 🗺️ Rutas de la Aplicación (Práctica 4)
+
+| Ruta | Componente | Layout | Descripción |
+|---|---|---|---|
+| `/` | `Landing` | — | Página de bienvenida con navegación a Login y Register |
+| `/login` | `Login` | — | Formulario de inicio de sesión |
+| `/register` | `Register` | — | Formulario de registro de usuario |
+| `/home` | `Home` | `MainLayout` | Panel principal con Sidebar (tras autenticarse) |
+
+> **Nota:** La ruta `/home` usa `MainLayout` como componente padre con rutas hijas (`children`), lo que permite que el Sidebar se muestre en todas las sub-páginas del home.
+
+## 🎨 Personalización del Tema — Paleta Teal
+
+Se personalizó el tema **Aura** de PrimeNG para usar la paleta de colores **Teal** como color primario mediante `definePreset`:
+
+```typescript
+const MyPreset = definePreset(Aura, {
+  semantic: {
+    primary: {
+      50: '{teal.50}',   100: '{teal.100}', 200: '{teal.200}',
+      300: '{teal.300}',  400: '{teal.400}', 500: '{teal.500}',
+      600: '{teal.600}',  700: '{teal.700}', 800: '{teal.800}',
+      900: '{teal.900}',  950: '{teal.950}'
+    }
+  }
+});
+```
+
+### Colores aplicados:
+- **Botón de Login:** Teal 900 (`#134e4a`) con hover en Teal 800 (`#115e59`)
+- **Sidebar fondo:** `#0f3d3e` (dark teal)
+- **Sidebar header:** `#0a2e2f` (teal más oscuro)
+- **Sidebar active item:** `rgba(20, 184, 166, 0.15)` con texto `#5eead4`
+- **Sidebar active border:** `#14b8a6` (teal 500)
+- **Componentes PrimeNG:** Todos usan la paleta Teal automáticamente
+
+## 🏷️ Float Labels — Variante On Label
+
+Se actualizó la variante de los `<p-floatlabel>` en los formularios de Login y Registro a **On Label** (`variant="on"`), donde el label se posiciona sobre el borde superior del input en lugar de flotar dentro del campo:
+
+```html
+<p-floatlabel variant="on">
+    <input pInputText id="email" [(ngModel)]="email" name="email" />
+    <label for="email">Email</label>
+</p-floatlabel>
+```
+
+## 🔗 Integración de PrimeIcons
+
+Se importó **PrimeIcons** globalmente en `styles.css` para que todos los íconos `pi pi-*` se carguen correctamente en toda la aplicación:
+
+```css
+@import 'primeicons/primeicons.css';
+```
+
+### Íconos utilizados en el Sidebar:
+| Ícono | Clase | Uso |
+|---|---|---|
+| 🎯 | `pi pi-bullseye` | Logo del sidebar |
+| 🏠 | `pi pi-home` | Menú: Inicio |
+| ↪️ | `pi pi-sign-out` | Botón: Cerrar sesión |
+| ◀ | `pi pi-angle-left` | Toggle: colapsar sidebar |
+| ▶ | `pi pi-angle-right` | Toggle: expandir sidebar |
+
+## ⚙️ Configuración de la Aplicación (Práctica 4)
+
+La configuración en `app.config.ts` ahora incluye:
+
+- **`provideRouter(routes)`** — Enrutamiento con rutas hijas para el layout.
+- **`provideAnimationsAsync()`** — Animaciones asíncronas de Angular.
+- **`providePrimeNG({ theme: { preset: MyPreset } })`** — Tema Aura personalizado con paleta **Teal** usando `definePreset` de `@primeuix/themes`.
+
+## 📝 Resumen de lo Implementado (Práctica 4)
+
+1. ✅ Componente `Sidebar` con navegación, íconos PrimeNG, toggle colapsable y logout
+2. ✅ Componente `MainLayout` con Sidebar + router-outlet para páginas protegidas
+3. ✅ Página `Home` limpia con texto "Bienvenido" centrado
+4. ✅ Estructura de carpetas: `components/`, `layout/`, `pages/home/` con archivos `.html`, `.ts`, `.css`
+5. ✅ Login redirige a `/home` tras autenticación exitosa
+6. ✅ Tema Aura personalizado con paleta **Teal** (`definePreset`)
+7. ✅ Botón de Login con color Teal 900 (`#134e4a`)
+8. ✅ PrimeIcons integrados globalmente (`@import 'primeicons/primeicons.css'`)
+9. ✅ Float Labels con variante **On Label** (`variant="on"`) en Login y Registro
+10. ✅ Sidebar con diseño dark teal profesional con transiciones suaves
+11. ✅ Ruta `/home` envuelta en `MainLayout` con rutas hijas (`children`)
+12. ✅ UX limpia, estilizada y ordenada cumpliendo los requisitos del pizarrón
+
+## 📌 Notas (Práctica 4)
+
+- El Sidebar actualmente solo tiene el enlace de **Inicio**; se pueden agregar más opciones de menú fácilmente añadiendo objetos al arreglo `menuItems` en `sidebar.ts`.
+- El `MainLayout` permite que cualquier página futura dentro de `/home/*` herede automáticamente el Sidebar.
+- La personalización del tema se hace con `definePreset` de `@primeuix/themes`, que extiende el preset Aura sin modificarlo directamente.
+- El botón de "Cerrar sesión" en el sidebar redirige a `/login` sin lógica de sesión (no hay backend).
+- La estructura sigue los lineamientos del **pizarrón de clase**: Pages → Home, Layout → MainLayout, Components → Sidebar, con buena UX y uso de PrimeNG.
 
 ---
 

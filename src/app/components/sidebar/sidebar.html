@@ -1,0 +1,35 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed">
+    <!-- Header del Sidebar -->
+    <div class="sidebar-header">
+        <div class="logo-section" *ngIf="!isCollapsed">
+            <i class="pi pi-bullseye logo-icon"></i>
+            <span class="logo-text">Practica 4</span>
+        </div>
+        <button class="toggle-btn" (click)="toggleSidebar()">
+            <i class="pi" [ngClass]="isCollapsed ? 'pi-angle-right' : 'pi-angle-left'"></i>
+        </button>
+    </div>
+
+    <!-- Navegación -->
+    <nav class="sidebar-nav">
+        <ul class="nav-list">
+            <li *ngFor="let item of menuItems" class="nav-item">
+                <a [routerLink]="item.route" routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: item.route === '/home' }" class="nav-link"
+                    [pTooltip]="isCollapsed ? item.label : ''" tooltipPosition="right">
+                    <i [class]="item.icon" class="nav-icon"></i>
+                    <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Footer del Sidebar -->
+    <div class="sidebar-footer">
+        <a class="nav-link logout-link" (click)="logout()" [pTooltip]="isCollapsed ? 'Cerrar sesión' : ''"
+            tooltipPosition="right">
+            <i class="pi pi-sign-out nav-icon"></i>
+            <span class="nav-label" *ngIf="!isCollapsed">Cerrar sesión</span>
+        </a>
+    </div>
+</aside>

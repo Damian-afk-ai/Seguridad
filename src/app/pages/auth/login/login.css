@@ -31,3 +31,13 @@ form {
 .credentials-hint small {
     font-size: 0.8rem;
 }
+
+:host ::ng-deep p-button button {
+    background: #134e4a !important;
+    border-color: #134e4a !important;
+}
+
+:host ::ng-deep p-button button:hover {
+    background: #115e59 !important;
+    border-color: #115e59 !important;
+}

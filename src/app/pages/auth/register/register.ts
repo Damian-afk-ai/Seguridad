@@ -59,7 +59,7 @@ export class Register {
         nombreCompleto: ['', [Validators.required, Validators.minLength(3)]],
         telefono: [
           '',
-          [Validators.required, Validators.pattern(/^\d+$/), Validators.minLength(10)],
+          [Validators.required, Validators.pattern(/^\d+$/), Validators.minLength(10), Validators.maxLength(10)],
         ],
         fechaNacimiento: [null, [Validators.required, this.ageValidator]],
         direccion: ['', [Validators.required, Validators.minLength(5)]],

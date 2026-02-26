@@ -58,7 +58,7 @@ export class Login {
       });
       // Redirigir al landing después de 1.5 segundos
       setTimeout(() => {
-        this.router.navigate(['/']);
+        this.router.navigate(['/home']);
       }, 1500);
     } else {
       this.messageService.add({

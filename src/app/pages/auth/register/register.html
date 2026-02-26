@@ -1,11 +1,12 @@
 <p-toast />
 <div class="register-container">
     <p-card header="Registro de Usuario">
+        <br>
         <form [formGroup]="registerForm" (ngSubmit)="register()">
 
             <!-- Usuario -->
             <div class="form-group">
-                <p-floatlabel>
+                <p-floatlabel variant="on">
                     <input pInputText id="usuario" formControlName="usuario" />
                     <label for="usuario">Usuario</label>
                 </p-floatlabel>
@@ -21,7 +22,7 @@
 
             <!-- Email -->
             <div class="form-group">
-                <p-floatlabel>
+                <p-floatlabel variant="on">
                     <input pInputText id="reg-email" formControlName="email" />
                     <label for="reg-email">Correo Electrónico</label>
                 </p-floatlabel>
@@ -37,7 +38,7 @@
 
             <!-- Contraseña -->
             <div class="form-group">
-                <p-floatlabel>
+                <p-floatlabel variant="on">
                     <p-password id="reg-password" formControlName="password" [toggleMask]="true" [feedback]="false" />
                     <label for="reg-password">Contraseña</label>
                 </p-floatlabel>
@@ -65,7 +66,7 @@
 
             <!-- Confirmar Contraseña -->
             <div class="form-group">
-                <p-floatlabel>
+                <p-floatlabel variant="on">
                     <p-password id="confirmPassword" formControlName="confirmPassword" [toggleMask]="true"
                         [feedback]="false" />
                     <label for="confirmPassword">Confirmar Contraseña</label>
@@ -85,7 +86,7 @@
 
             <!-- Nombre Completo -->
             <div class="form-group">
-                <p-floatlabel>
+                <p-floatlabel variant="on">
                     <input pInputText id="nombreCompleto" formControlName="nombreCompleto" />
                     <label for="nombreCompleto">Nombre Completo</label>
                 </p-floatlabel>
@@ -101,8 +102,8 @@
 
             <!-- Teléfono -->
             <div class="form-group">
-                <p-floatlabel>
-                    <input pInputText id="telefono" formControlName="telefono" maxlength="15" />
+                <p-floatlabel variant="on">
+                    <input pInputText id="telefono" formControlName="telefono" maxlength="10" />
                     <label for="telefono">Teléfono (solo números)</label>
                 </p-floatlabel>
                 <div *ngIf="isInvalid('telefono')" class="error-messages">
@@ -112,16 +113,17 @@
                     <small *ngIf="f['telefono'].errors?.['pattern']" class="p-error">
                         Solo se permiten números.
                     </small>
-                    <small *ngIf="f['telefono'].errors?.['minlength'] && !f['telefono'].errors?.['pattern']"
+                    <small
+                        *ngIf="(f['telefono'].errors?.['minlength'] || f['telefono'].errors?.['maxlength']) && !f['telefono'].errors?.['pattern']"
                         class="p-error">
-                        Debe tener al menos 10 dígitos.
+                        El teléfono debe tener exactamente 10 dígitos.
                     </small>
                 </div>
             </div>
 
             <!-- Fecha de Nacimiento -->
             <div class="form-group">
-                <p-floatlabel>
+                <p-floatlabel variant="on">
                     <p-datepicker id="fechaNacimiento" formControlName="fechaNacimiento" [maxDate]="maxDate"
                         dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" />
                     <label for="fechaNacimiento">Fecha de Nacimiento</label>
@@ -138,7 +140,7 @@
 
             <!-- Dirección -->
             <div class="form-group">
-                <p-floatlabel>
+                <p-floatlabel variant="on">
                     <input pInputText id="direccion" formControlName="direccion" />
                     <label for="direccion">Dirección</label>
                 </p-floatlabel>
