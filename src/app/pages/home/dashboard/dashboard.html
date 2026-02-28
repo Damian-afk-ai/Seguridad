@@ -1,0 +1,16 @@
+<h2>Dashboard</h2>
+<p class="subtitle">Resumen general del sistema</p>
+
+<div class="cards-grid">
+    <p-card *ngFor="let card of cards">
+        <div class="stat-content">
+            <div class="stat-icon">
+                <i [class]="card.icon"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-value">{{ card.value }}</span>
+                <p-tag [value]="card.title" [severity]="card.severity" />
+            </div>
+        </div>
+    </p-card>
+</div>

@@ -1,0 +1,55 @@
+<p-toast />
+
+<p-card header="Perfil de Usuario">
+    <div class="profile-header">
+        <p-avatar icon="pi pi-user" size="xlarge" shape="circle" />
+        <div class="profile-info">
+            <h3>{{ admin.nombre }}</h3>
+            <p-tag [value]="admin.rol" severity="info" icon="pi pi-shield" />
+        </div>
+    </div>
+
+    <p-divider />
+
+    <!-- Nombre -->
+    <div class="field">
+        <p-floatlabel [variant]="isEditing ? 'on' : 'in'">
+            <input pInputText id="nombre" [(ngModel)]="admin.nombre" [disabled]="!isEditing" />
+            <label for="nombre">Nombre</label>
+        </p-floatlabel>
+    </div>
+
+    <!-- Email -->
+    <div class="field">
+        <p-floatlabel [variant]="isEditing ? 'on' : 'in'">
+            <input pInputText id="email" [(ngModel)]="admin.email" [disabled]="!isEditing" />
+            <label for="email">Correo Electrónico</label>
+        </p-floatlabel>
+    </div>
+
+    <!-- Contraseña -->
+    <div class="field">
+        <p-floatlabel [variant]="isEditing ? 'on' : 'in'">
+            <p-password id="password" [(ngModel)]="admin.password" [feedback]="false" [toggleMask]="true"
+                [disabled]="!isEditing" />
+            <label for="password">Contraseña</label>
+        </p-floatlabel>
+    </div>
+
+    <!-- Teléfono -->
+    <div class="field">
+        <p-floatlabel [variant]="isEditing ? 'on' : 'in'">
+            <input pInputText id="telefono" [(ngModel)]="admin.telefono" [disabled]="!isEditing" />
+            <label for="telefono">Teléfono</label>
+        </p-floatlabel>
+    </div>
+
+    <p-divider />
+
+    <!-- Botones -->
+    <div class="actions">
+        <p-button *ngIf="!isEditing" label="Editar Perfil" icon="pi pi-pencil" (onClick)="toggleEdit()" />
+        <p-button *ngIf="isEditing" label="Guardar" icon="pi pi-check" (onClick)="saveChanges()" />
+        <p-button *ngIf="isEditing" label="Cancelar" icon="pi pi-times" severity="secondary" (onClick)="cancelEdit()" />
+    </div>
+</p-card>

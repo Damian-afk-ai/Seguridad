@@ -57,10 +57,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "practica2:build:production"
+              "buildTarget": "practica5:build:production"
             },
             "development": {
-              "buildTarget": "practica2:build:development"
+              "buildTarget": "practica5:build:development"
             }
           },
           "defaultConfiguration": "development"

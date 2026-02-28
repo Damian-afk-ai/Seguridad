@@ -1,0 +1,37 @@
+:host {
+    display: block;
+    padding: 32px;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin-bottom: 24px;
+}
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.stat-content {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.stat-icon {
+    font-size: 1.8rem;
+    color: var(--p-primary-color);
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+}

@@ -4,7 +4,7 @@ Aplicación web frontend desarrollada con **Angular 21** y **PrimeNG 21** como p
 
 ## 📋 Descripción General
 
-Este proyecto se ha desarrollado de forma incremental a lo largo de múltiples prácticas. Comenzó como una configuración inicial del entorno de desarrollo (Práctica 1), evolucionó a una SPA con sistema de autenticación (Práctica 2), se extendió con validación de credenciales hardcodeadas y formulario de registro con validaciones avanzadas (Práctica 3), y finalmente se implementó una estructura de layout con Sidebar de navegación, página Home y personalización del tema visual con la paleta Teal (Práctica 4).
+Este proyecto se ha desarrollado de forma incremental a lo largo de múltiples prácticas. Comenzó como una configuración inicial del entorno de desarrollo (Práctica 1), evolucionó a una SPA con sistema de autenticación (Práctica 2), se extendió con validación de credenciales hardcodeadas y formulario de registro con validaciones avanzadas (Práctica 3), se implementó una estructura de layout con Sidebar de navegación, página Home y personalización del tema visual con la paleta Teal (Práctica 4), y finalmente se agregaron sub-rutas con páginas completas (Dashboard, Productos, Usuario, Grupos, Admin), un sidebar tipo tree con secciones expandibles, y se migró toda la UI a componentes exclusivos de PrimeNG (Práctica 5).
 
 ---
 
@@ -529,6 +529,219 @@ La configuración en `app.config.ts` ahora incluye:
 - La personalización del tema se hace con `definePreset` de `@primeuix/themes`, que extiende el preset Aura sin modificarlo directamente.
 - El botón de "Cerrar sesión" en el sidebar redirige a `/login` sin lógica de sesión (no hay backend).
 - La estructura sigue los lineamientos del **pizarrón de clase**: Pages → Home, Layout → MainLayout, Components → Sidebar, con buena UX y uso de PrimeNG.
+
+---
+
+# Práctica 5 — Sub-rutas, Páginas de Gestión y Migración Completa a PrimeNG
+
+## 📋 Descripción
+
+En esta quinta práctica se extendió significativamente la aplicación con **5 nuevas sub-rutas** dentro del layout principal, se implementó un **sidebar tipo tree** con secciones expandibles, se creó una **página de perfil de usuario** para el administrador con funcionalidad de edición, y se realizó una **migración completa a componentes PrimeNG** en todas las páginas que anteriormente usaban HTML/CSS custom. Todo el proyecto ahora utiliza exclusivamente PrimeNG para la interfaz de usuario.
+
+## 🎯 Objetivos
+
+1. Crear sub-rutas dentro de `/home` para Dashboard, Productos, Usuario, Grupos y Admin.
+2. Implementar un sidebar con navegación tipo tree (secciones expandibles).
+3. Crear una página de perfil de usuario (admin) con edición de datos usando PrimeNG.
+4. Crear páginas de Dashboard, Productos, Grupos y Admin con datos estáticos.
+5. Agregar una página Home con cards de acceso rápido a todas las secciones.
+6. Migrar **todas** las páginas a componentes exclusivos de PrimeNG (sin HTML/CSS custom).
+7. Mantener toda la información estática (sin base de datos).
+
+## 📁 Estructura del Proyecto (Práctica 5)
+
+```
+src/app/
+├── app.ts                       # Componente raíz con RouterOutlet
+├── app.html                     # Template del componente raíz
+├── app.css                      # Estilos del componente raíz
+├── app.config.ts                # Configuración (Router, PrimeNG con Teal)
+├── app.routes.ts                # Rutas actualizadas con 5 sub-rutas
+├── components/
+│   └── sidebar/
+│       ├── sidebar.ts           # Sidebar con navegación tipo tree
+│       ├── sidebar.html         # Template con secciones expandibles
+│       └── sidebar.css          # Estilos del sidebar con animaciones
+├── layout/
+│   └── main-layout/
+│       ├── main-layout.ts       # Layout principal (Sidebar + contenido)
+│       ├── main-layout.html     # Template del layout
+│       └── main-layout.css      # Estilos del layout
+└── pages/
+    ├── home/
+    │   ├── home.ts              # Home con quick-links usando p-card y p-button
+    │   ├── home.html            # Template con cards de acceso rápido
+    │   ├── home.css             # Estilos mínimos de layout
+    │   ├── dashboard/           # ← NUEVO
+    │   │   ├── dashboard.ts     # Dashboard con p-card y p-tag
+    │   │   ├── dashboard.html   # Template con stat cards
+    │   │   └── dashboard.css    # Estilos de layout
+    │   ├── products/            # ← NUEVO
+    │   │   ├── products.ts      # Productos con p-table y p-tag
+    │   │   ├── products.html    # Template con tabla PrimeNG
+    │   │   └── products.css     # Estilos mínimos
+    │   ├── users/               # ← NUEVO (Perfil de Admin)
+    │   │   ├── users.ts         # Perfil con edición, p-card, p-avatar, p-toast
+    │   │   ├── users.html       # Template con campos p-floatlabel
+    │   │   └── users.css        # Estilos mínimos de layout
+    │   ├── groups/              # ← NUEVO
+    │   │   ├── groups.ts        # Grupos con p-card, p-tag, p-divider
+    │   │   ├── groups.html      # Template con cards de grupos
+    │   │   └── groups.css       # Estilos de grid layout
+    │   └── admin/               # ← NUEVO
+    │       ├── admin.ts         # Admin con p-card, p-table, p-tag
+    │       ├── admin.html       # Template con info cards y tabla de logs
+    │       └── admin.css        # Estilos de layout
+    ├── landing/
+    │   └── ...                  # (sin cambios)
+    └── auth/
+        ├── login/
+        │   └── ...              # (sin cambios)
+        └── register/
+            └── ...              # (sin cambios)
+```
+
+## 🧩 Componentes Implementados (Práctica 5)
+
+### 1. `Home` (Página Principal — Actualizada)
+- **Archivo:** `src/app/pages/home/home.ts`
+- **Ruta:** `/home`
+- Ahora muestra **cards de acceso rápido** a cada sección usando `p-card` y `p-button`
+- Cada card tiene un ícono PrimeIcons, el nombre de la sección y un botón outlined "Ir a..."
+- **Componentes PrimeNG:** `CardModule`, `ButtonModule`
+
+### 2. `Dashboard` (Panel de Métricas)
+- **Archivo:** `src/app/pages/home/dashboard/dashboard.ts`
+- **Ruta:** `/home/dashboard`
+- Muestra 2 cards con métricas estáticas:
+  - **Total Proyectos** → 12 (severity: `info`)
+  - **Avance General** → 78% (severity: `success`)
+- **Componentes PrimeNG:** `CardModule`, `TagModule`
+
+### 3. `Products` (Catálogo de Productos)
+- **Archivo:** `src/app/pages/home/products/products.ts`
+- **Ruta:** `/home/products`
+- Tabla con 5 productos estáticos usando `p-table` con filas zebra (`stripedRows`)
+- Badges de categoría y estado usando `p-tag` con severities dinámicas:
+  - Activo → `success` (verde)
+  - Inactivo → `danger` (rojo)
+- **Componentes PrimeNG:** `CardModule`, `TableModule`, `TagModule`
+
+### 4. `Users` (Perfil del Administrador)
+- **Archivo:** `src/app/pages/home/users/users.ts`
+- **Ruta:** `/home/users`
+- Página de perfil del administrador con datos estáticos editables:
+  - **Nombre:** Administrador
+  - **Email:** admin@correo.com
+  - **Contraseña:** Seguridad1!
+  - **Teléfono:** 6141234567
+  - **Rol:** Administrador (mostrado con `p-tag`)
+- Funcionalidad de **editar/guardar/cancelar** con toggle de modo edición
+- Float labels con **variant dinámico**: `"in"` cuando está deshabilitado (vista), `"on"` cuando está habilitado (edición), eliminando el contraste visual entre la label y el input gris
+- Notificaciones Toast al guardar cambios
+- **Componentes PrimeNG:** `CardModule`, `AvatarModule`, `TagModule`, `FloatLabelModule`, `InputTextModule`, `PasswordModule`, `DividerModule`, `ButtonModule`, `ToastModule`
+
+### 5. `Groups` (Administración de Grupos)
+- **Archivo:** `src/app/pages/home/groups/groups.ts`
+- **Ruta:** `/home/groups`
+- 4 cards de grupos con datos estáticos:
+  - **Administradores** (3 miembros) — Acceso total al sistema
+  - **Editores** (5 miembros) — Pueden crear y editar contenido
+  - **Viewers** (12 miembros) — Solo lectura
+  - **Soporte** (4 miembros) — Atención a incidencias
+- Cada card muestra un ícono PrimeIcons, descripción, divider y tag con conteo de miembros
+- **Componentes PrimeNG:** `CardModule`, `TagModule`, `DividerModule`
+
+### 6. `Admin` (Panel de Administración)
+- **Archivo:** `src/app/pages/home/admin/admin.ts`
+- **Ruta:** `/home/admin`
+- **Información del sistema** (4 info cards):
+  - Versión del sistema: v0.0.5
+  - Último despliegue: 27/Feb/2026
+  - Usuarios activos: 24
+  - Tiempo activo: 99.8%
+- **Registro de Actividad** (tabla con 5 logs):
+  - Cada log tiene hora, acción, usuario y tipo con `p-tag` por severity
+  - Severities: `info`, `warn`, `success`, `danger`
+- **Componentes PrimeNG:** `CardModule`, `TableModule`, `TagModule`
+
+### 7. `Sidebar` (Navegación Tipo Tree — Actualizado)
+- **Archivo:** `src/app/components/sidebar/sidebar.ts`
+- Se actualizó para incluir **navegación tipo tree** con secciones expandibles:
+  - **Inicio** → `/home`
+  - **Dashboard** → `/home/dashboard`
+  - **Gestión** (expandible con flecha `pi-chevron-down`):
+    - **Usuario** → `/home/users`
+    - **Grupos** → `/home/groups`
+  - **Productos** → `/home/products`
+  - **Admin** → `/home/admin`
+- Sub-ítems con **animación slide-down** y conectores visuales
+- Versión `0.0.5` mostrada en el footer del sidebar
+- Título actualizado a "Practica 5"
+
+## 🗺️ Rutas de la Aplicación (Práctica 5)
+
+| Ruta | Componente | Layout | Descripción |
+|---|---|---|---|
+| `/` | `Landing` | — | Página de bienvenida |
+| `/login` | `Login` | — | Formulario de inicio de sesión |
+| `/register` | `Register` | — | Formulario de registro |
+| `/home` | `Home` | `MainLayout` | Cards de acceso rápido a secciones |
+| `/home/dashboard` | `Dashboard` | `MainLayout` | Métricas: Total Proyectos y Avance General |
+| `/home/products` | `Products` | `MainLayout` | Tabla de productos con p-table |
+| `/home/users` | `Users` | `MainLayout` | Perfil del administrador con edición |
+| `/home/groups` | `Groups` | `MainLayout` | Cards de grupos y roles |
+| `/home/admin` | `Admin` | `MainLayout` | Info del sistema y registro de actividad |
+
+> Todas las rutas bajo `/home/*` heredan el `MainLayout` que incluye el Sidebar.
+
+## 🧩 Componentes PrimeNG Utilizados (Práctica 5)
+
+| Componente | Módulo | Páginas donde se usa |
+|---|---|---|
+| `p-card` | `CardModule` | Home, Dashboard, Products, Users, Groups, Admin |
+| `p-table` | `TableModule` | Products, Admin |
+| `p-tag` | `TagModule` | Dashboard, Products, Users, Groups, Admin |
+| `p-button` | `ButtonModule` | Home, Users, Landing |
+| `p-avatar` | `AvatarModule` | Users |
+| `p-divider` | `DividerModule` | Users, Groups |
+| `p-floatlabel` | `FloatLabelModule` | Users (con variant dinámico `in`/`on`) |
+| `pInputText` | `InputTextModule` | Users |
+| `p-password` | `PasswordModule` | Users |
+| `p-toast` | `ToastModule` | Users |
+| `pTooltip` | `TooltipModule` | Sidebar |
+| `pRipple` | `RippleModule` | Sidebar |
+
+## 🔧 Cambios de Configuración (Práctica 5)
+
+- **`package.json`**: Nombre del proyecto actualizado de `practica2` a `practica5`, versión `0.0.5`
+- **`angular.json`**: Build targets actualizados a `practica5:build:production` y `practica5:build:development`
+- **`index.html`**: Título de la pestaña actualizado a `Practica5`
+- **`app.routes.ts`**: Se agregaron 5 sub-rutas hijas bajo `/home`
+
+## 📝 Resumen de lo Implementado (Práctica 5)
+
+1. ✅ 5 nuevas sub-rutas bajo `/home`: Dashboard, Products, Users, Groups, Admin
+2. ✅ Sidebar actualizado con navegación **tipo tree** (sección "Gestión" expandible)
+3. ✅ Página **Home** con cards de acceso rápido (`p-card` + `p-button`)
+4. ✅ Página **Dashboard** con 2 stat cards (`p-card` + `p-tag`)
+5. ✅ Página **Productos** con tabla PrimeNG (`p-table` + `p-tag`)
+6. ✅ Página **Usuario** (perfil del admin) con edición (`p-floatlabel`, `p-avatar`, `p-toast`)
+7. ✅ Página **Grupos** con 4 cards de roles (`p-card` + `p-tag` + `p-divider`)
+8. ✅ Página **Admin** con info del sistema y registro de actividad (`p-card` + `p-table` + `p-tag`)
+9. ✅ Float labels con **variant dinámico** (`"in"` deshabilitado / `"on"` editando) en perfil de usuario
+10. ✅ **Migración completa a PrimeNG** — Todas las páginas usan exclusivamente componentes PrimeNG
+11. ✅ Nombre del proyecto actualizado a `practica5` con versión `0.0.5`
+12. ✅ Título de la app actualizado a "Practica5" en `index.html`
+13. ✅ Datos 100% estáticos (sin base de datos)
+
+## 📌 Notas (Práctica 5)
+
+- **Sin base de datos:** Todos los datos (productos, grupos, logs, perfil) están hardcodeados como arrays estáticos en los componentes TypeScript.
+- **PrimeNG everywhere:** Se eliminó todo HTML/CSS custom en las páginas para usar exclusivamente componentes PrimeNG como `p-card`, `p-table`, `p-tag`, `p-avatar`, `p-button`, etc.
+- **Float label variant dinámico:** En la página de usuario, el variant cambia de `"in"` (label dentro del campo gris) a `"on"` (label sobre el borde) según el estado de edición, evitando el contraste visual del fondo blanco de la label sobre inputs deshabilitados grises.
+- **Sidebar tree:** La sección "Gestión" es expandible con animación slide-down y muestra sub-ítems "Usuario" y "Grupos" con líneas conectoras.
+- **Edición de perfil:** El botón "Editar Perfil" habilita los campos, cambia a botones "Guardar" y "Cancelar", y muestra un Toast al guardar.
 
 ---
 

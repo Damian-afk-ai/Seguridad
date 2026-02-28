@@ -154,6 +154,89 @@
     letter-spacing: 0.2px;
 }
 
+/* ── Tree Arrow ── */
+.tree-parent {
+    user-select: none;
+}
+
+.tree-arrow {
+    margin-left: auto;
+    font-size: 0.7rem;
+    transition: transform 0.25s ease;
+    color: var(--sidebar-text);
+    opacity: 0.6;
+}
+
+.tree-arrow.rotated {
+    transform: rotate(180deg);
+}
+
+/* ── Sub-list (Tree Children) ── */
+.sub-list {
+    list-style: none;
+    margin: 0;
+    padding: 2px 0 2px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sub-link {
+    padding: 10px 14px 10px 38px !important;
+    font-size: 0.88rem;
+}
+
+.sub-icon {
+    font-size: 0.95rem !important;
+    width: 18px !important;
+}
+
+/* ── Tree Connector Line ── */
+.has-children {
+    position: relative;
+}
+
+.sub-list .sub-item {
+    position: relative;
+}
+
+.sub-list .sub-item::before {
+    content: '';
+    position: absolute;
+    left: 26px;
+    top: 0;
+    height: 100%;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.sub-list .sub-item:last-child::before {
+    height: 50%;
+}
+
+.sub-list .sub-item::after {
+    content: '';
+    position: absolute;
+    left: 26px;
+    top: 50%;
+    width: 8px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
 /* ── Footer ── */
 .sidebar-footer {
     padding: 12px;
@@ -167,6 +250,16 @@
 .logout-link:hover {
     background: rgba(248, 113, 113, 0.1) !important;
     color: #fca5a5 !important;
+}
+
+/* ── Version Label ── */
+.version-label {
+    display: block;
+    text-align: center;
+    padding: 8px 12px 14px;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 0.3px;
 }
 
 /* ── Collapsed State ── */

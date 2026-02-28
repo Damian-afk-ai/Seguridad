@@ -1,0 +1,13 @@
+<h2>Grupos</h2>
+<p class="subtitle">Administración de grupos de usuarios</p>
+
+<div class="groups-grid">
+    <p-card *ngFor="let group of groups" [header]="group.name">
+        <div class="group-content">
+            <i [class]="group.icon" class="group-main-icon"></i>
+            <p>{{ group.description }}</p>
+        </div>
+        <p-divider />
+        <p-tag [value]="group.members + ' miembros'" icon="pi pi-users" severity="info" />
+    </p-card>
+</div>

@@ -1,0 +1,9 @@
+:host {
+    display: block;
+    padding: 32px;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin-bottom: 24px;
+}

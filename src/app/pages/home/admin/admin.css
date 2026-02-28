@@ -1,0 +1,47 @@
+:host {
+    display: block;
+    padding: 32px;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin-bottom: 24px;
+}
+
+h3 {
+    margin: 28px 0 12px;
+}
+
+/* ── Info Grid ── */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.info-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.info-icon {
+    font-size: 1.5rem;
+    color: var(--p-primary-color);
+}
+
+.info-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.info-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.info-label {
+    font-size: 0.8rem;
+    color: #9ca3af;
+}

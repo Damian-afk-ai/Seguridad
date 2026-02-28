@@ -1,0 +1,27 @@
+:host {
+    display: block;
+    padding: 32px;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin-bottom: 24px;
+}
+
+.groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.group-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 60px;
+}
+
+.group-main-icon {
+    font-size: 2rem;
+    color: var(--p-primary-color);
+}

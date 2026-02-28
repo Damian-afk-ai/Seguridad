@@ -3,23 +3,43 @@
     <div class="sidebar-header">
         <div class="logo-section" *ngIf="!isCollapsed">
             <i class="pi pi-bullseye logo-icon"></i>
-            <span class="logo-text">Practica 4</span>
+            <span class="logo-text">Practica 5</span>
         </div>
         <button class="toggle-btn" (click)="toggleSidebar()">
             <i class="pi" [ngClass]="isCollapsed ? 'pi-angle-right' : 'pi-angle-left'"></i>
         </button>
     </div>
 
-    <!-- Navegación -->
+    <!-- Navegación tipo Tree -->
     <nav class="sidebar-nav">
         <ul class="nav-list">
-            <li *ngFor="let item of menuItems" class="nav-item">
-                <a [routerLink]="item.route" routerLinkActive="active"
+            <li *ngFor="let item of menuItems" class="nav-item" [class.has-children]="item.children">
+
+                <!-- Link directo (sin hijos) -->
+                <a *ngIf="item.route && !item.children" [routerLink]="item.route" routerLinkActive="active"
                     [routerLinkActiveOptions]="{ exact: item.route === '/home' }" class="nav-link"
                     [pTooltip]="isCollapsed ? item.label : ''" tooltipPosition="right">
                     <i [class]="item.icon" class="nav-icon"></i>
                     <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
                 </a>
+
+                <!-- Sección expandible (con hijos) -->
+                <a *ngIf="item.children" class="nav-link tree-parent" (click)="toggleSection(item)"
+                    [class.expanded]="item.expanded" [pTooltip]="isCollapsed ? item.label : ''" tooltipPosition="right">
+                    <i [class]="item.icon" class="nav-icon"></i>
+                    <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+                    <i class="pi pi-chevron-down tree-arrow" *ngIf="!isCollapsed" [class.rotated]="item.expanded"></i>
+                </a>
+
+                <!-- Sub-ítems -->
+                <ul class="sub-list" *ngIf="item.children && item.expanded && !isCollapsed">
+                    <li *ngFor="let child of item.children" class="sub-item">
+                        <a [routerLink]="child.route" routerLinkActive="active" class="nav-link sub-link">
+                            <i [class]="child.icon" class="nav-icon sub-icon"></i>
+                            <span class="nav-label">{{ child.label }}</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
         </ul>
     </nav>
@@ -32,5 +52,5 @@
             <span class="nav-label" *ngIf="!isCollapsed">Cerrar sesión</span>
         </a>
     </div>
-    <span style="color: grey;">version 0.0.4.1</span>
+    <span class="version-label" *ngIf="!isCollapsed">version 0.0.5</span>
 </aside>

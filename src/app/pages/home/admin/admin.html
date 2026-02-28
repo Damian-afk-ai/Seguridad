@@ -1,0 +1,40 @@
+<h2>Administración</h2>
+<p class="subtitle">Panel de control del sistema</p>
+
+<!-- System Info Cards -->
+<div class="info-grid">
+    <p-card *ngFor="let item of systemInfo">
+        <div class="info-content">
+            <i [class]="item.icon" class="info-icon"></i>
+            <div class="info-text">
+                <span class="info-value">{{ item.value }}</span>
+                <span class="info-label">{{ item.label }}</span>
+            </div>
+        </div>
+    </p-card>
+</div>
+
+<!-- Activity Log -->
+<h3>Registro de Actividad</h3>
+<p-card>
+    <p-table [value]="logs" [stripedRows]="true">
+        <ng-template #header>
+            <tr>
+                <th>Hora</th>
+                <th>Acción</th>
+                <th>Usuario</th>
+                <th>Tipo</th>
+            </tr>
+        </ng-template>
+        <ng-template #body let-log>
+            <tr>
+                <td><strong>{{ log.time }}</strong></td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.user }}</td>
+                <td>
+                    <p-tag [value]="log.type" [severity]="getSeverity(log.type)" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
