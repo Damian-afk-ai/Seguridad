@@ -1,0 +1,67 @@
+<p-toast />
+
+<!-- Encabezado de sección -->
+<div class="page-header">
+    <div class="header-text">
+        <h2>Tickets</h2>
+        <p class="subtitle">Gestión de tickets de soporte</p>
+    </div>
+    <ng-container *ifHasPermission="['tickets_add']">
+        <p-button label="Crear Ticket" icon="pi pi-plus" (onClick)="crearTicket()" />
+    </ng-container>
+</div>
+
+<!-- Tabla de tickets -->
+<p-card>
+    <p-table [value]="tickets" [paginator]="true" [rows]="5" [rowsPerPageOptions]="[5, 10, 25]"
+        [showCurrentPageReport]="true" currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} tickets"
+        [tableStyle]="{ 'min-width': '40rem' }" stripedRows>
+
+        <ng-template #header>
+            <tr>
+                <th pSortableColumn="id">ID <p-sortIcon field="id" /></th>
+                <th pSortableColumn="asunto">Asunto <p-sortIcon field="asunto" /></th>
+                <th pSortableColumn="estado">Estado <p-sortIcon field="estado" /></th>
+                <th>Acciones</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-ticket>
+            <tr>
+                <td>
+                    <span class="ticket-id">#{{ ticket.id }}</span>
+                </td>
+                <td>
+                    <span class="ticket-asunto">{{ ticket.asunto }}</span>
+                </td>
+                <td>
+                    <p-tag [value]="ticket.estado" [severity]="getStatusSeverity(ticket.estado)"
+                        [icon]="getStatusIcon(ticket.estado)" />
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <ng-container *ifHasPermission="['tickets_edit']">
+                            <p-button icon="pi pi-pencil" [rounded]="true" severity="info" [text]="true"
+                                pTooltip="Editar" tooltipPosition="top" (onClick)="editarTicket(ticket)" />
+                        </ng-container>
+                        <ng-container *ifHasPermission="['tickets_delete']">
+                            <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [text]="true"
+                                pTooltip="Eliminar" tooltipPosition="top" (onClick)="eliminarTicket(ticket)" />
+                        </ng-container>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="4">
+                    <div class="empty-state">
+                        <i class="pi pi-inbox"></i>
+                        <p>No se encontraron tickets</p>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>

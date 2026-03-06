@@ -1,0 +1,64 @@
+:host {
+    display: block;
+    padding: 32px;
+}
+
+/* ===== Encabezado ===== */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.header-text h2 {
+    margin: 0 0 4px 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1e1e2f;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* ===== Tabla ===== */
+.ticket-id {
+    font-weight: 700;
+    color: var(--p-primary-color);
+    font-size: 0.95rem;
+}
+
+.ticket-asunto {
+    font-weight: 500;
+    color: #1e1e2f;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+/* ===== Estado vacío ===== */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    color: #9ca3af;
+    gap: 12px;
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    margin: 0;
+}

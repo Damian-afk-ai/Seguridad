@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "practica2": {
+    "practica5": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -34,8 +34,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -57,10 +57,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "practica2:build:production"
+              "buildTarget": "practica5:build:production"
             },
             "development": {
-              "buildTarget": "practica2:build:development"
+              "buildTarget": "practica5:build:development"
             }
           },
           "defaultConfiguration": "development"

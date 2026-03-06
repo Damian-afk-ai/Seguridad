@@ -1,0 +1,145 @@
+<p-toast />
+<p-confirmDialog />
+
+<!-- Encabezado de sección -->
+<div class="page-header">
+    <div class="header-text">
+        <h2>Grupos</h2>
+        <p class="subtitle">Administración de grupos de usuarios</p>
+    </div>
+    <ng-container *ifHasPermission="['groups_add']">
+        <p-button label="Agregar Grupo" icon="pi pi-plus" (onClick)="openAddDialog()" />
+    </ng-container>
+</div>
+
+<!-- Barra de búsqueda -->
+<div class="search-bar">
+    <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input pInputText type="text" [(ngModel)]="searchQuery" placeholder="Buscar grupo por nombre o descripción..."
+            class="search-input" />
+    </p-iconfield>
+</div>
+
+<!-- Tabla de grupos -->
+<p-card>
+    <p-table [value]="filteredGroups" [paginator]="true" [rows]="5" [rowsPerPageOptions]="[5, 10, 25]"
+        [showCurrentPageReport]="true" currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} grupos"
+        [tableStyle]="{ 'min-width': '50rem' }" stripedRows>
+
+        <ng-template #header>
+            <tr>
+                <th>Icono</th>
+                <th pSortableColumn="name">Nombre <p-sortIcon field="name" /></th>
+                <th>Descripción</th>
+                <th pSortableColumn="members">Miembros <p-sortIcon field="members" /></th>
+                <th pSortableColumn="status">Estado <p-sortIcon field="status" /></th>
+                <th>Acciones</th>
+            </tr>
+        </ng-template>
+
+        <ng-template #body let-group>
+            <tr>
+                <td>
+                    <div class="icon-cell">
+                        <i [class]="group.icon" class="group-row-icon"></i>
+                    </div>
+                </td>
+                <td>
+                    <span class="group-name">{{ group.name }}</span>
+                </td>
+                <td>
+                    <span class="group-desc">{{ group.description }}</span>
+                </td>
+                <td>
+                    <p-tag [value]="group.members + ' miembros'" icon="pi pi-users" severity="info" />
+                </td>
+                <td>
+                    <p-tag [value]="group.status" [severity]="getStatusSeverity(group.status)"
+                        [icon]="group.status === 'Activo' ? 'pi pi-check' : 'pi pi-times'" />
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <ng-container *ifHasPermission="['groups_edit']">
+                            <p-button icon="pi pi-pencil" [rounded]="true" severity="info" [text]="true"
+                                pTooltip="Editar" tooltipPosition="top" (onClick)="openEditDialog(group)" />
+                        </ng-container>
+                        <ng-container *ifHasPermission="['groups_edit']">
+                            <p-button icon="pi pi-power-off" [rounded]="true" [text]="true"
+                                [severity]="group.status === 'Activo' ? 'warn' : 'success'"
+                                [pTooltip]="group.status === 'Activo' ? 'Desactivar' : 'Activar'" tooltipPosition="top"
+                                (onClick)="toggleStatus(group)" />
+                        </ng-container>
+                        <ng-container *ifHasPermission="['groups_delete']">
+                            <p-button icon="pi pi-trash" [rounded]="true" severity="danger" [text]="true"
+                                pTooltip="Eliminar" tooltipPosition="top" (onClick)="confirmDelete(group)" />
+                        </ng-container>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <ng-template #emptymessage>
+            <tr>
+                <td colspan="6">
+                    <div class="empty-state">
+                        <i class="pi pi-inbox"></i>
+                        <p>No se encontraron grupos</p>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+
+<!-- Modal para Agregar / Editar -->
+<p-dialog [header]="isEditing ? 'Editar Grupo' : 'Agregar Grupo'" [(visible)]="showDialog" [modal]="true"
+    [style]="{ width: '480px' }" [draggable]="false" [resizable]="false" [closable]="true" (onHide)="closeDialog()">
+
+    <div class="dialog-body">
+        <!-- Nombre -->
+        <div class="field">
+            <p-floatlabel variant="on">
+                <input pInputText id="groupName" [(ngModel)]="selectedGroup.name" class="w-full" />
+                <label for="groupName">Nombre del grupo</label>
+            </p-floatlabel>
+        </div>
+
+        <!-- Descripción -->
+        <div class="field">
+            <p-floatlabel variant="on">
+                <textarea pTextarea id="groupDesc" [(ngModel)]="selectedGroup.description" rows="3"
+                    class="w-full"></textarea>
+                <label for="groupDesc">Descripción</label>
+            </p-floatlabel>
+        </div>
+
+        <!-- Miembros -->
+        <div class="field">
+            <p-floatlabel variant="on">
+                <input pInputText id="groupMembers" type="number" [(ngModel)]="selectedGroup.members" class="w-full" />
+                <label for="groupMembers">Número de miembros</label>
+            </p-floatlabel>
+        </div>
+
+        <!-- Selector de icono -->
+        <div class="field">
+            <label class="icon-label">Icono del grupo</label>
+            <div class="icon-picker">
+                <button *ngFor="let icon of availableIcons" type="button" class="icon-option"
+                    [class.selected]="selectedGroup.icon === icon" (click)="selectIcon(icon)">
+                    <i [class]="icon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #footer>
+        <div class="dialog-footer">
+            <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [text]="true"
+                (onClick)="closeDialog()" />
+            <p-button [label]="isEditing ? 'Guardar Cambios' : 'Crear Grupo'"
+                [icon]="isEditing ? 'pi pi-check' : 'pi pi-plus'" (onClick)="saveGroup()" />
+        </div>
+    </ng-template>
+</p-dialog>

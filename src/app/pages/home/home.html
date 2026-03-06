@@ -1,0 +1,15 @@
+<h1>Bienvenido</h1>
+<p class="subtitle">Selecciona una sección para comenzar</p>
+
+<div class="quick-links-grid">
+    <p-card *ngFor="let link of quickLinks" styleClass="link-card">
+        <div class="link-content">
+            <i [class]="link.icon" class="link-icon"></i>
+            <span class="link-label">{{ link.label }}</span>
+        </div>
+        <ng-template #footer>
+            <p-button [label]="'Ir a ' + link.label" [routerLink]="link.route" icon="pi pi-arrow-right" iconPos="right"
+                size="small" outlined="true" />
+        </ng-template>
+    </p-card>
+</div>

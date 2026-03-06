@@ -1,0 +1,153 @@
+:host {
+    display: block;
+    padding: 32px;
+}
+
+/* ===== Encabezado ===== */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.header-text h2 {
+    margin: 0 0 4px 0;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1e1e2f;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* ===== Búsqueda ===== */
+.search-bar {
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 400px;
+}
+
+/* ===== Tabla ===== */
+.group-row-icon {
+    font-size: 1.4rem;
+    color: var(--p-primary-color);
+}
+
+.icon-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--p-primary-color) 10%, transparent);
+}
+
+.group-name {
+    font-weight: 600;
+    color: #1e1e2f;
+}
+
+.group-desc {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+/* ===== Estado vacío ===== */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    color: #9ca3af;
+    gap: 12px;
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* ===== Modal ===== */
+.dialog-body {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-top: 8px;
+}
+
+.field {
+    width: 100%;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* ===== Icon Picker ===== */
+.icon-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 10px;
+}
+
+.icon-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.icon-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 2px solid #e5e7eb;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.1rem;
+    color: #6b7280;
+}
+
+.icon-option:hover {
+    border-color: var(--p-primary-color);
+    color: var(--p-primary-color);
+    background: color-mix(in srgb, var(--p-primary-color) 6%, transparent);
+}
+
+.icon-option.selected {
+    border-color: var(--p-primary-color);
+    background: color-mix(in srgb, var(--p-primary-color) 12%, transparent);
+    color: var(--p-primary-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--p-primary-color) 18%, transparent);
+}

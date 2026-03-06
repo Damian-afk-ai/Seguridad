@@ -1,0 +1,31 @@
+:host {
+    display: block;
+    padding: 32px;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin-bottom: 28px;
+}
+
+.quick-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.link-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.link-icon {
+    font-size: 1.6rem;
+    color: var(--p-primary-color);
+}
+
+.link-label {
+    font-size: 1.05rem;
+    font-weight: 600;
+}
