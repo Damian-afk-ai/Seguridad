@@ -143,33 +143,41 @@ El sistema ya no depende de mocks: todo, desde el renderizado de la UI hasta las
 
 ---
 
-### Refactorización de Arquitectura y API Gateway (Post-Práctica 10)
-- **`ApiGatewayService`**: Creación de una capa lógica (middleware) en el frontend que intercepta todas las peticiones a Supabase. Valida sesión y permisos granulares antes de ejecutar una consulta y envuelve las respuestas en el patrón estándar `ApiResponse` (incluyendo códigos de operación internos `intOpCode`).
-- **`PermissionService`**: Extracción y centralización de la lógica RBAC (Role-Based Access Control) a un servicio dedicado y reactivo.
-- **`TicketService`**: Servicio para desacoplar las interacciones con `public.tickets` usando el `ApiGatewayService`.
-- **Nuevos Documentos de Contexto**: Se crearon los archivos `context_summary.md` y `audit_report.md` para proveer contexto arquitectónico claro a futuras implementaciones de IA.
+# Evaluación Final – Migración Arquitectónica a Microservicios Backend (Fastify)
+
+## 📋 Descripción
+
+Como **Evaluación Final** de la materia, se abandonó la arquitectura donde el Frontend (Angular) consultaba directamente a Supabase. Se diseñó y construyó un **Backend-for-Frontend (BFF)** robusto utilizando **Fastify** puro, implementando una arquitectura de microservicios. Ahora toda la lógica de seguridad, inyección de tokens y permisos recae bajo la infraestructura del servidor local (Node), delegando la responsabilidad y exponiendo una API RESTful limpia al Frontend.
+
+## 🎯 Objetivos Logrados
+
+1. **Arquitectura de Microservicios:** El backend está compuesto por cuatros servicios independientes (alojados en un mismo repositorio/monorepo para facilidad de desarrollo): un `Gateway` central y servicios de `Auth`, `Ticket` y `User`.
+2. **API Gateway (Puerto 3000):** Proxy que enruta el tráfico usando `@fastify/cors` y protegiendo el acceso con **Rate Limiting Global** de 100 peticiones por minuto por IP.
+3. **Interceptor de Angular Funcional:** Refactor del frontend eliminando Supabase SDK e integrando `authInterceptor`, el cual inyecta el **Token JWT (firmado localmente)** a través de `HttpClient` y atrapa debidamente errores globales de sesión (`401`) y tasa de límite (`429`).
+4. **Validación JWT y Service Role Key:** La `Service Role Key` (acceso de administrador de Base de Datos) fue incrustada responsablemente bajo los archivos `.env` (ocultos en el backend), permitiendo que el Frontend dependa enteramente de los microservicios sin exponer claves primarias.
+5. **Autenticación (Puerto 3001) y Capa RBAC (Puerto 3003):** Lógica inteligente de "Move Ticket" donde el backend local impide movimientos falsos validando `isOwner` a menos que el JWT del Payload posea los 5 permisos de cambio de estado de tickets.
 
 ---
 
-## 🚀 Cómo Ejecutar el Proyecto Final
+## 🚀 Cómo Ejecutar el Proyecto Completo (Evaluación Final)
 
 ### Prerrequisitos
-- **Node.js** (versión compatible con Angular 21)
-- Instancia activa de **Supabase** (credenciales configurables localmente) con los scripts SQL provistos para creación de tablas/columnas e.g., `puesto`.
+- **Node.js** (v20 o superior).
+- Copiar las variables de entorno: Crear el archivo `.env` dentro de `/backend` con `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `JWT_SECRET` y puertos (GATEWAY_PORT=3000...).
 
-### Instalación
+### 1. Levantar la capa Backend (Microservicios)
+En una nueva instancia de terminal (PowerShell o CMD):
+```bash
+cd backend
+npm install
+npm run dev
+```
+Levantará e integrará automáticamente el **API Gateway (:3000)** y todos los sub-servicios bajo concurrencia, esperando órdenes del frontend.
+
+### 2. Levantar la capa Frontend (Angular UI)
+En otra instancia de terminal ubicada en la raíz del proyecto (Practica10):
 ```bash
 npm install
-```
-
-### Servidor de desarrollo
-```bash
 ng serve
 ```
-Abre tu navegador en `http://localhost:4200/`. La aplicación se recarga automáticamente.
-
-### Build de producción
-```bash
-ng build
-```
-Los artefactos de compilación se guardan en el directorio `dist/`.
+Abre tu navegador en `http://localhost:4200/`. Toda petición de Angular volará directo hacia tu Gateway (Backend) en lugar de una base de datos expuesta.

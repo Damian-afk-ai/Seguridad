@@ -32,8 +32,8 @@
             <span class="nav-section">Gestión</span>
         </li>
 
-        <!-- Grupos -->
-        <li>
+        <!-- Grupos (requiere group:view) -->
+        <li *appHasPermission="'group:view'">
             <a routerLink="/home/groups" routerLinkActive="active"
                [pTooltip]="collapsed ? 'Grupos' : ''" tooltipPosition="right">
                 <i class="pi pi-sitemap"></i>
@@ -41,8 +41,8 @@
             </a>
         </li>
 
-        <!-- Gestión Usuarios (solo admin) -->
-        <li>
+        <!-- Gestión Usuarios (solo admin: user:manage_permissions) -->
+        <li *appHasPermission="'user:manage_permissions'">
             <a routerLink="/home/admin-users" routerLinkActive="active"
                [pTooltip]="collapsed ? 'Gestión Usuarios' : ''" tooltipPosition="right">
                 <i class="pi pi-users"></i>

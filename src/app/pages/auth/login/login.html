@@ -5,7 +5,8 @@
         <form [formGroup]="form" (ngSubmit)="submit()" class="form">
             <div class="field">
                 <label>Usuario / Email</label>
-                <input pInputText type="text" formControlName="email" placeholder="admin / user" />
+                <input pInputText type="text" formControlName="email" placeholder="admin / user"
+                    [disabled]="isLocked" />
 
                 <small class="error" *ngIf="form.controls['email'].touched && form.controls['email'].invalid">
                     Ingresa un usuario válido.
@@ -15,7 +16,7 @@
             <div class="field">
                 <label>Contraseña</label>
                 <p-password formControlName="password" [toggleMask]="true" [feedback]="false"
-                    placeholder="Ingresa tu contraseña!">
+                    placeholder="Ingresa tu contraseña!" [disabled]="isLocked">
                 </p-password>
 
                 <small class="error" *ngIf="form.controls['password'].touched && form.controls['password'].invalid">
@@ -23,7 +24,20 @@
                 </small>
             </div>
 
-            <button pButton type="submit" label="Ingresar" [loading]="loading" class="w-full"></button>
+            <!-- Rate Limit Warning -->
+            <div class="rate-limit-banner" *ngIf="isLocked">
+                <i class="pi pi-lock"></i>
+                <span>Demasiados intentos. Reintenta en <b>{{ cooldownRemaining }}s</b></span>
+            </div>
+
+            <div class="attempts-warning" *ngIf="failedAttempts > 0 && !isLocked">
+                <i class="pi pi-exclamation-triangle"></i>
+                <span>Intentos fallidos: {{ failedAttempts }}/3</span>
+            </div>
+
+            <button pButton type="submit" [label]="isLocked ? 'Bloqueado (' + cooldownRemaining + 's)' : 'Ingresar'"
+                [loading]="loading" class="w-full"
+                [disabled]="isLocked"></button>
 
             <div class="register-link">
                 <span>¿No tienes cuenta?</span>
@@ -31,4 +45,4 @@
             </div>
         </form>
     </p-card>
-</div>
+</div>

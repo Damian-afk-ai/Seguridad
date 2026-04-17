@@ -47,6 +47,7 @@ export class Users implements OnInit {
   // ── Estado reactivo ─────────────────────────────────────────────────────────
   loading = signal(true);
   currentUser = signal<AppUser | null>(null);
+  groupName = signal<string>('Sin grupo');
 
   q = '';
 
@@ -71,6 +72,9 @@ export class Users implements OnInit {
 
     if (user?.groupId) {
       await this.loadMyTickets(user);
+      const groupsRes = await this.auth.getGroups();
+      const g = groupsRes.data?.find(x => x.id === user.groupId);
+      this.groupName.set(g?.name ?? 'Sin grupo');
     }
 
     this.loading.set(false);

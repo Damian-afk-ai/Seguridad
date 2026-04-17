@@ -1,0 +1,26 @@
+{
+  "name": "backend-microservices",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "gateway": "npx tsx gateway/index.ts",
+    "auth-service": "npx tsx auth-service/index.ts",
+    "ticket-service": "npx tsx ticket-service/index.ts",
+    "user-service": "npx tsx user-service/index.ts",
+    "dev": "concurrently -n GW,AUTH,TICKET,USER -c cyan,green,yellow,magenta \"npm run gateway\" \"npm run auth-service\" \"npm run ticket-service\" \"npm run user-service\""
+  },
+  "dependencies": {
+    "fastify": "^5.3.3",
+    "@fastify/cors": "^11.0.0",
+    "@fastify/rate-limit": "^10.2.0",
+    "@fastify/jwt": "^9.1.0",
+    "@supabase/supabase-js": "^2.101.0",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "concurrently": "^9.1.0"
+  }
+}

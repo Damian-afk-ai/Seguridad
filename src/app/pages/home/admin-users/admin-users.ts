@@ -18,6 +18,8 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { CheckboxModule } from 'primeng/checkbox';
 
 import { AuthService, DbUser, DbGroup, DbPermission } from '../../../services/auth.service';
+import { PermissionService } from '../../../services/permission.service';
+import { Router } from '@angular/router';
 
 /** Interfaz de edición en el diálogo */
 interface EditForm {
@@ -60,6 +62,8 @@ export class AdminUsers implements OnInit {
     private auth       = inject(AuthService);
     private confirmSvc = inject(ConfirmationService);
     private msg        = inject(MessageService);
+    private permSvc    = inject(PermissionService);
+    private router     = inject(Router);
 
     loading = signal(true);
     users   = signal<DbUser[]>([]);
@@ -99,6 +103,11 @@ export class AdminUsers implements OnInit {
     });
 
     async ngOnInit() {
+        // Guard interno: redirigir si no tiene user:manage_permissions
+        if (!this.permSvc.hasPermission('user:manage_permissions')) {
+            this.router.navigate(['/home/dashboard']);
+            return;
+        }
         await this.loadData();
     }
 
@@ -132,6 +141,10 @@ export class AdminUsers implements OnInit {
 
     async saveUser() {
         if (!this.editingUser) return;
+        if (!this.permSvc.hasPermission('user:edit')) {
+            this.msg.add({ severity: 'error', summary: 'Sin permiso', detail: 'No tienes permiso para editar usuarios.', life: 3000 });
+            return;
+        }
         this.saving.set(true);
 
         const result = await this.auth.updateUser(this.editingUser.id, {
@@ -196,22 +209,67 @@ export class AdminUsers implements OnInit {
 
     async togglePerm(perm: PermRow, field: 'can_view' | 'can_create' | 'can_edit' | 'can_delete') {
         if (!perm.id) return;
+        if (!this.permSvc.hasPermission('user:manage_permissions')) {
+            perm[field] = !perm[field]; // revert UI
+            this.msg.add({ severity: 'error', summary: 'Sin permiso', detail: 'No tienes permiso para modificar permisos.', life: 3000 });
+            return;
+        }
 
-        const newValue = !perm[field];
-        perm[field] = newValue;
+        // ngModel already flipped perm[field] before onChange fires — use it directly
+        const newValue = perm[field];
 
         const result = await this.auth.updatePermission(perm.id, { [field]: newValue });
         if (result.statusCode !== 200) {
-            perm[field] = !newValue; // revert
+            perm[field] = !newValue; // revert UI on failure
             this.msg.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el permiso.', life: 3000 });
         } else {
             this.msg.add({ severity: 'success', summary: 'Permiso actualizado', detail: `${perm.label}: ${field} → ${newValue ? 'Sí' : 'No'}`, life: 2000 });
         }
     }
 
+    async selectAllPerms(value: boolean) {
+        if (!this.permSvc.hasPermission('user:manage_permissions')) {
+            this.msg.add({ severity: 'error', summary: 'Sin permiso', detail: 'No tienes permiso para modificar permisos.', life: 3000 });
+            return;
+        }
+
+        const perms = this.groupPerms();
+        this.loadingPerms.set(true);
+        let errorCount = 0;
+
+        for (const p of perms) {
+            if (!p.id) continue;
+            if (p.can_view !== value || p.can_create !== value || p.can_edit !== value || p.can_delete !== value) {
+                const result = await this.auth.updatePermission(p.id, {
+                    can_view: value, can_create: value, can_edit: value, can_delete: value
+                });
+                if (result.statusCode !== 200) {
+                    errorCount++;
+                } else {
+                    p.can_view = value;
+                    p.can_create = value;
+                    p.can_edit = value;
+                    p.can_delete = value;
+                }
+            }
+        }
+        
+        this.loadingPerms.set(false);
+
+        if (errorCount > 0) {
+            this.msg.add({ severity: 'error', summary: 'Error', detail: `Fallo al actualizar ${errorCount} recurso(s).`, life: 3000 });
+        } else {
+            this.msg.add({ severity: 'success', summary: 'Actualizado', detail: `Todos marcados como ${value ? 'Sí' : 'No'}.`, life: 3000 });
+        }
+    }
+
     // ═══ Eliminar usuario ═══════════════════════════════════════════════════
 
     confirmDelete(user: DbUser, event: Event) {
+        if (!this.permSvc.hasPermission('user:delete')) {
+            this.msg.add({ severity: 'error', summary: 'Sin permiso', detail: 'No tienes permiso para eliminar usuarios.', life: 3000 });
+            return;
+        }
         this.confirmSvc.confirm({
             target: event.target as EventTarget,
             message: `¿Eliminar a "${user.full_name}" (${user.email})?`,

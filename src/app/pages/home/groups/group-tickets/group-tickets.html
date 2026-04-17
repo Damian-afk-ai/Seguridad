@@ -97,7 +97,7 @@
                         </ng-template>
                         <div class="card-content">
                             <div class="row-details">
-                                <span class="date"><i class="pi pi-calendar"></i> {{ ticket.createdAt | date:'dd/MM/yy' }}</span>
+                                <span class="date text-color-secondary" [title]="ticket.dueDate ? 'Fecha límite' : 'Sin fecha límite'"><i class="pi pi-calendar"></i> {{ ticket.dueDate ? (ticket.dueDate | date:'dd/MM/yy':'UTC') : 'Sin Asignar' }}</span>
                                 <p-avatar [label]="assigneeLabel(ticket.assignee)" shape="circle"
                                     [title]="assigneeName(ticket.assignee)"></p-avatar>
                             </div>
@@ -126,7 +126,7 @@
                         </ng-template>
                         <div class="card-content">
                             <div class="row-details">
-                                <span class="date"><i class="pi pi-calendar"></i> {{ ticket.createdAt | date:'dd/MM/yy' }}</span>
+                                <span class="date text-color-secondary" [title]="ticket.dueDate ? 'Fecha límite' : 'Sin fecha límite'"><i class="pi pi-calendar"></i> {{ ticket.dueDate ? (ticket.dueDate | date:'dd/MM/yy':'UTC') : 'Sin Asignar' }}</span>
                                 <p-avatar [label]="assigneeLabel(ticket.assignee)" shape="circle"
                                     [title]="assigneeName(ticket.assignee)"></p-avatar>
                             </div>
@@ -155,7 +155,7 @@
                         </ng-template>
                         <div class="card-content">
                             <div class="row-details">
-                                <span class="date"><i class="pi pi-calendar"></i> {{ ticket.createdAt | date:'dd/MM/yy' }}</span>
+                                <span class="date text-color-secondary" [title]="ticket.dueDate ? 'Fecha límite' : 'Sin fecha límite'"><i class="pi pi-calendar"></i> {{ ticket.dueDate ? (ticket.dueDate | date:'dd/MM/yy':'UTC') : 'Sin Asignar' }}</span>
                                 <p-avatar [label]="assigneeLabel(ticket.assignee)" shape="circle"
                                     [title]="assigneeName(ticket.assignee)"></p-avatar>
                             </div>
@@ -184,7 +184,7 @@
                         </ng-template>
                         <div class="card-content">
                             <div class="row-details">
-                                <span class="date"><i class="pi pi-calendar"></i> {{ ticket.createdAt | date:'dd/MM/yy' }}</span>
+                                <span class="date text-color-secondary" [title]="ticket.dueDate ? 'Fecha límite' : 'Sin fecha límite'"><i class="pi pi-calendar"></i> {{ ticket.dueDate ? (ticket.dueDate | date:'dd/MM/yy':'UTC') : 'Sin Asignar' }}</span>
                                 <p-avatar [label]="assigneeLabel(ticket.assignee)" shape="circle"
                                     [title]="assigneeName(ticket.assignee)"></p-avatar>
                             </div>
@@ -213,7 +213,7 @@
                         </ng-template>
                         <div class="card-content">
                             <div class="row-details">
-                                <span class="date"><i class="pi pi-calendar"></i> {{ ticket.createdAt | date:'dd/MM/yy' }}</span>
+                                <span class="date text-color-secondary" [title]="ticket.dueDate ? 'Fecha límite' : 'Sin fecha límite'"><i class="pi pi-calendar"></i> {{ ticket.dueDate ? (ticket.dueDate | date:'dd/MM/yy':'UTC') : 'Sin Asignar' }}</span>
                                 <p-avatar [label]="assigneeLabel(ticket.assignee)" shape="circle"
                                     [title]="assigneeName(ticket.assignee)"></p-avatar>
                             </div>
@@ -266,6 +266,11 @@
                                 placeholder="Selecciona un miembro"
                                 [disabled]="!canAssignTicket && !canEditFull"></p-select>
                         </div>
+                        <div class="flex-1 flex flex-column gap-2">
+                            <label for="dueDate">Fecha Límite</label>
+                            <input pInputText type="date" id="dueDate" [(ngModel)]="editingTicket.dueDate" class="w-full"
+                                [disabled]="!canEditFull" />
+                        </div>
                     </div>
                 </div>
 
@@ -275,9 +280,10 @@
                     <div class="history-section flex flex-column gap-3">
                         <h3 class="m-0 text-lg font-semibold border-bottom-1 surface-border pb-2">Info del Ticket</h3>
                         <div class="flex flex-column gap-2">
-                            <div class="text-xs text-color-secondary">ID: <b>{{ selectedTicket?.id }}</b></div>
-                            <div class="text-xs text-color-secondary">Creado: <b>{{ selectedTicket?.createdAt | date:'dd/MM/yyyy HH:mm' }}</b></div>
-                            <div class="text-xs text-color-secondary">Grupo ID: <b>{{ selectedTicket?.groupId }}</b></div>
+                            <div class="text-xs text-color-secondary">ID: <b>{{ selectedTicket.id | slice:0:8 }}...</b></div>
+                            <div class="text-xs text-color-secondary">Creado: <b>{{ selectedTicket.createdAt | date:'dd/MM/yyyy HH:mm' }}</b></div>
+                            <div class="text-xs text-color-secondary">Grupo: <b>{{ selectedGroup()?.nombre || selectedTicket.groupId }}</b></div>
+                            <div class="text-xs text-color-secondary" *ngIf="selectedTicket.dueDate">Límite: <b class="text-orange-500">{{ selectedTicket.dueDate | date:'dd/MM/yyyy':'UTC' }}</b></div>
                         </div>
                     </div>
                 </div>
@@ -285,7 +291,7 @@
 
             <ng-template pTemplate="footer">
                 <span class="text-xs text-color-secondary mr-auto mt-2" *ngIf="selectedTicket">
-                    Creado por: <b>{{selectedTicket.createdBy}}</b>
+                    Creado por: <b>{{ assigneeName(selectedTicket.createdBy) }}</b>
                 </span>
 
                 <!-- ✅ Botón Eliminar protegido con directiva -->
@@ -295,7 +301,8 @@
                 <p-button label="Descartar" icon="pi pi-times" [text]="true" severity="secondary"
                     (onClick)="cancelEdit()"></p-button>
                 <p-button label="Guardar" icon="pi pi-check" [text]="true"
-                    [disabled]="!canEditFull && !canEditStatusOnly"
+                    [disabled]="(!canEditFull && !canEditStatusOnly) || isSaving"
+                    [loading]="isSaving"
                     (onClick)="saveTicket()"></p-button>
             </ng-template>
         </p-dialog>
@@ -329,18 +336,25 @@
                     </div>
                 </div>
 
-                <div class="flex flex-column gap-2">
-                    <label for="newAssignee" class="font-semibold">Asignado a</label>
-                    <p-select [options]="memberOptions()" [(ngModel)]="newTicket.assignee"
-                        optionLabel="label" optionValue="value" appendTo="body" styleClass="w-full"
-                        placeholder="Selecciona un miembro del grupo"></p-select>
+                <div class="flex gap-4">
+                    <div class="flex-1 flex flex-column gap-2">
+                        <label for="newAssignee" class="font-semibold">Asignado a</label>
+                        <p-select [options]="memberOptions()" [(ngModel)]="newTicket.assignee"
+                            optionLabel="label" optionValue="value" appendTo="body" styleClass="w-full"
+                            placeholder="Selecciona un miembro del grupo"></p-select>
+                    </div>
+                    <div class="flex-1 flex flex-column gap-2">
+                        <label for="newDueDate" class="font-semibold">Fecha Límite</label>
+                        <input pInputText type="date" id="newDueDate" [(ngModel)]="newTicket.dueDate" class="w-full" />
+                    </div>
                 </div>
             </div>
             <ng-template pTemplate="footer">
                 <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary"
                     (onClick)="createDialogVisible = false"></p-button>
                 <p-button label="Crear Ticket" icon="pi pi-check" (onClick)="confirmCreateTicket()"
-                    [disabled]="!newTicket.title"></p-button>
+                    [disabled]="!newTicket.title || isSaving"
+                    [loading]="isSaving"></p-button>
             </ng-template>
         </p-dialog>
     </ng-container>
@@ -373,10 +387,10 @@
                     <td>
                         <div class="flex align-items-center gap-2">
                             <p-avatar [label]="assigneeLabel(ticket.assignee)" shape="circle"></p-avatar>
-                            <span>{{ticket.assignee}}</span>
+                            <span>{{ assigneeName(ticket.assignee) }}</span>
                         </div>
                     </td>
-                    <td>{{ ticket.createdAt | date:'dd/MM/yy' }}</td>
+                    <td>{{ ticket.dueDate ? (ticket.dueDate | date:'dd/MM/yy':'UTC') : 'Sin fecha' }}</td>
                 </tr>
             </ng-template>
             <ng-template pTemplate="emptymessage">

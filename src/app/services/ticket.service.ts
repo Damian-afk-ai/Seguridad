@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { ApiGatewayService } from './api-gateway.service';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../enviroments/enviroment';
 import { AuthService } from './auth.service';
-import { PermissionService } from './permission.service';
-import { SupabaseService } from './supabase.service';
 import type { ApiResponse } from '../models/api-response.model';
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
@@ -23,6 +23,7 @@ export interface TicketDB {
   status: TicketState;
   priority: PriorityLevel;
   assignee: string | null;
+  due_date: string | null;
   created_at?: string;
 }
 
@@ -35,6 +36,7 @@ export interface TicketItem {
   createdBy: string;
   assignee: string;
   priority: PriorityLevel;
+  dueDate?: string | null;
   createdAt?: string;
   description?: string;
 }
@@ -49,6 +51,7 @@ function dbToApp(row: TicketDB): TicketItem {
     createdBy: row.created_by,
     assignee: row.assignee ?? '',
     priority: row.priority,
+    dueDate: row.due_date ?? null,
     createdAt: row.created_at ?? '',
     description: row.description ?? '',
   };
@@ -64,15 +67,14 @@ function respond<T>(statusCode: number, data: T): ApiResponse<T> {
 }
 
 /**
- * TicketService — Todas las respuestas siguen { statusCode, intOpCode, data }.
- * Valida token + permisos antes de cada operación.
+ * TicketService — Usa HttpClient → API Gateway → Ticket Microservice.
+ * Todas las respuestas siguen { statusCode, intOpCode, data }.
  */
 @Injectable({ providedIn: 'root' })
 export class TicketService {
-  private gateway     = inject(ApiGatewayService);
-  private auth        = inject(AuthService);
-  private permissions = inject(PermissionService);
-  private sb          = inject(SupabaseService);
+  private http = inject(HttpClient);
+  private auth = inject(AuthService);
+  private api  = environment.apiUrl;
 
   // ── Obtener tickets de un grupo ────────────────────────────────────────────
 
@@ -80,19 +82,20 @@ export class TicketService {
     const user = this.auth.currentUser();
     if (!user) return respond(401, null);
 
-    if (!this.permissions.hasPermission('ticket:view')) {
-      return respond(403, null);
+    try {
+      const res = await firstValueFrom(
+        this.http.get<ApiResponse<TicketDB[]>>(`${this.api}/tickets`, {
+          params: { group_id: groupId },
+        })
+      );
+
+      if (res.statusCode === 200 && res.data) {
+        return respond(200, res.data.map(dbToApp));
+      }
+      return respond(res.statusCode, null);
+    } catch (err: any) {
+      return respond(err?.status ?? 500, null);
     }
-
-    const { data, error } = await this.sb.client
-      .from('tickets')
-      .select('id, title, description, created_by, group_id, status, priority, assignee')
-      .eq('group_id', groupId)
-      .order('id', { ascending: false });
-
-    if (error) return respond(500, null);
-
-    return respond(200, (data as TicketDB[]).map(dbToApp));
   }
 
   // ── Crear ticket ───────────────────────────────────────────────────────────
@@ -101,20 +104,30 @@ export class TicketService {
     const user = this.auth.currentUser();
     if (!user) return respond(401, null);
 
-    const payload: Partial<TicketDB> = {
+    const payload = {
       title: ticket.title,
       description: ticket.description ?? '',
-      created_by: user.id,
       group_id: ticket.groupId ?? user.groupId,
       status: ticket.state ?? 'Pendiente',
       priority: ticket.priority ?? 'Media',
-      assignee: ticket.assignee ?? null
+      assignee: ticket.assignee ?? null,
+      due_date: ticket.dueDate ?? null,
     };
 
-    const res = await this.gateway.insert<TicketDB>('tickets', 'ticket:create', payload);
-    if (res.statusCode !== 201) return respond(res.statusCode, null);
+    try {
+      const res = await firstValueFrom(
+        this.http.post<ApiResponse<TicketDB>>(`${this.api}/tickets`, payload)
+      );
 
-    return respond(201, dbToApp(res.data as TicketDB));
+      if ((res.statusCode === 201 || res.statusCode === 200) && res.data) {
+        return respond(201, dbToApp(res.data));
+      }
+      return respond(res.statusCode, null);
+    } catch (err: any) {
+      // Rate limit (429) del trigger de DB
+      const status = err?.status ?? 500;
+      return respond(status, null);
+    }
   }
 
   // ── Actualizar ticket (edición general) ────────────────────────────────────
@@ -129,19 +142,28 @@ export class TicketService {
     if (changes.state !== undefined)       payload.status      = changes.state;
     if (changes.priority !== undefined)    payload.priority    = changes.priority;
     if (changes.assignee !== undefined)    payload.assignee    = changes.assignee;
+    if (changes.dueDate !== undefined)     payload.due_date    = changes.dueDate;
 
-    const res = await this.gateway.update<TicketDB>('tickets', 'ticket:edit', ticketId, payload);
-    if (res.statusCode !== 200) return respond(res.statusCode, null);
+    try {
+      const res = await firstValueFrom(
+        this.http.patch<ApiResponse<TicketDB>>(`${this.api}/tickets/${ticketId}`, payload)
+      );
 
-    return respond(200, dbToApp(res.data as TicketDB));
+      if (res.statusCode === 200 && res.data) {
+        return respond(200, dbToApp(res.data));
+      }
+      return respond(res.statusCode, null);
+    } catch (err: any) {
+      return respond(err?.status ?? 500, null);
+    }
   }
 
   // ── Mover ticket (drag-and-drop Kanban) ────────────────────────────────────
   /**
-   * editState / moveTicket — Reglas de negocio del pizarrón:
+   * moveTicket — Reglas de negocio del pizarrón:
    *   1. El usuario DEBE tener permiso "ticket:change_status".
    *   2. El ticket DEBE estar asignado al usuario que hace el movimiento.
-   * Si no cumple ambas → 403.
+   * Estas reglas ahora se validan en el backend (ticket-service).
    */
   async moveTicket(
     ticketId: string,
@@ -151,25 +173,38 @@ export class TicketService {
     const user = this.auth.currentUser();
     if (!user) return respond(401, null);
 
-    // Regla 1: permiso
-    if (!this.permissions.hasPermission('ticket:change_status')) {
-      return respond(403, null);
+    try {
+      const res = await firstValueFrom(
+        this.http.patch<ApiResponse<TicketDB>>(`${this.api}/tickets/${ticketId}/move`, {
+          newState,
+          assigneeId: ticketAssigneeId,
+        })
+      );
+
+      if (res.statusCode === 200 && res.data) {
+        return respond(200, dbToApp(res.data));
+      }
+      return respond(res.statusCode, null);
+    } catch (err: any) {
+      const status = err?.status ?? 500;
+      // Preservar intOpCode especial de ownership
+      if (status === 403) {
+        return { statusCode: 403, intOpCode: 'SxTI403_OWNER', data: null };
+      }
+      return respond(status, null);
     }
-
-    // Regla 2: ownership — ticket debe estar asignado al usuario actual
-    if (ticketAssigneeId !== user.id) {
-      return { statusCode: 403, intOpCode: 'SxTI403_OWNER', data: null };
-    }
-
-    const res = await this.gateway.update<TicketDB>('tickets', 'ticket:change_status', ticketId, { status: newState });
-    if (res.statusCode !== 200) return respond(res.statusCode, null);
-
-    return respond(200, dbToApp(res.data as TicketDB));
   }
 
   // ── Eliminar ticket ────────────────────────────────────────────────────────
 
   async deleteTicket(ticketId: string): Promise<ApiResponse<null>> {
-    return this.gateway.delete('tickets', 'ticket:delete', ticketId);
+    try {
+      const res = await firstValueFrom(
+        this.http.delete<ApiResponse<null>>(`${this.api}/tickets/${ticketId}`)
+      );
+      return respond(res.statusCode, null);
+    } catch (err: any) {
+      return respond(err?.status ?? 500, null);
+    }
   }
 }

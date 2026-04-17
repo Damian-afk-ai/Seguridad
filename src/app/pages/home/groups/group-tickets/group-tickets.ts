@@ -66,11 +66,11 @@ export class GroupTickets implements OnInit {
 
   // ── Miembros del grupo (para dropdown "Asignado a") ─────────────────────
   groupMembers = signal<DbUser[]>([]);
+  allUsersList = signal<DbUser[]>([]);
   memberOptions = computed(() => [
     { label: '— Sin asignar —', value: '' },
     ...this.groupMembers().map(u => ({ label: `${u.full_name} (${u.email})`, value: u.id }))
   ]);
-
 
   activeFilter: 'Mis tickets' | 'Sin asignar' | 'Prioridad Alta' | null = null;
 
@@ -103,6 +103,7 @@ export class GroupTickets implements OnInit {
   selectedTicket: TicketItem | null = null;
   editingTicket: Partial<TicketItem> = {};
   newCommentText = '';
+  isSaving = false;
 
   // ── Lifecycle ────────────────────────────────────────────────────────────────
   async ngOnInit() {
@@ -127,6 +128,7 @@ export class GroupTickets implements OnInit {
   private async loadGroupMembers(groupId: string) {
     const res = await this.auth.getUsers();
     const allUsers = res.data ?? [];
+    this.allUsersList.set(allUsers);
     this.groupMembers.set(allUsers.filter(u => u.group_id === groupId));
   }
 
@@ -222,19 +224,29 @@ export class GroupTickets implements OnInit {
   openTicket(ticket: TicketItem) {
     this.selectedTicket = ticket;
     this.editingTicket = { ...ticket };
+    if (this.editingTicket.dueDate) {
+      this.editingTicket.dueDate = this.editingTicket.dueDate.split('T')[0];
+    }
     this.newCommentText = '';
     this.editDialogVisible = true;
   }
 
   // ── Guardar cambios del ticket (Supabase) ────────────────────────────────────
   async saveTicket() {
-    if (!this.selectedTicket) return;
+    if (!this.selectedTicket || this.isSaving) return;
+    this.isSaving = true;
 
     const changes: Partial<TicketItem> = {};
     if (this.editingTicket.title       !== this.selectedTicket.title)       changes.title       = this.editingTicket.title;
     if (this.editingTicket.description !== this.selectedTicket.description) changes.description = this.editingTicket.description;
     if (this.editingTicket.state       !== this.selectedTicket.state)       changes.state       = this.editingTicket.state;
     if (this.editingTicket.priority    !== this.selectedTicket.priority)    changes.priority    = this.editingTicket.priority;
+    if (this.editingTicket.assignee    !== this.selectedTicket.assignee)    changes.assignee    = this.editingTicket.assignee;
+    
+    const oldDueDate = this.selectedTicket.dueDate ? this.selectedTicket.dueDate.split('T')[0] : undefined;
+    if (this.editingTicket.dueDate !== oldDueDate) {
+      changes.dueDate = this.editingTicket.dueDate;
+    }
 
     if (Object.keys(changes).length > 0) {
       const result = await this.ticketSvc.updateTicket(this.selectedTicket.id, changes);
@@ -249,6 +261,7 @@ export class GroupTickets implements OnInit {
 
     this.editDialogVisible = false;
     this.selectedTicket = null;
+    this.isSaving = false;
   }
 
   cancelEdit() {
@@ -281,7 +294,8 @@ export class GroupTickets implements OnInit {
   }
 
   async confirmCreateTicket() {
-    if (!this.newTicket.title || !this.selectedGroup()) return;
+    if (!this.newTicket.title || !this.selectedGroup() || this.isSaving) return;
+    this.isSaving = true;
     this.newTicket.groupId = this.selectedGroup()!.id;
 
     const result = await this.ticketSvc.createTicket(this.newTicket);
@@ -292,9 +306,12 @@ export class GroupTickets implements OnInit {
       this.msgService.add({ severity: 'success', summary: 'Ticket creado',
         detail: `"${result.data.title}"`, life: 2500 });
       this.openTicket(result.data);
+    } else if (result.statusCode === 429) {
+      this.msgService.add({ severity: 'warn', summary: 'Rate Limit', detail: 'Has creado demasiados tickets. Espera un momento antes de intentar de nuevo.', life: 5000 });
     } else {
       this.msgService.add({ severity: 'error', summary: 'Error al crear', detail: 'Verifica los datos.', life: 3000 });
     }
+    this.isSaving = false;
   }
 
   addComment() {
@@ -329,7 +346,7 @@ export class GroupTickets implements OnInit {
   /** Inicial del asignado para el avatar. Resuelve UUID → nombre. */
   assigneeLabel(assignee: string): string {
     if (!assignee) return '?';
-    const member = this.groupMembers().find(u => u.id === assignee);
+    const member = this.allUsersList().find(u => u.id === assignee);
     if (member) return member.full_name.charAt(0).toUpperCase();
     return assignee.includes('@') ? assignee.charAt(0).toUpperCase() : '?';
   }
@@ -337,7 +354,7 @@ export class GroupTickets implements OnInit {
   /** Nombre completo del asignado. UUID → full_name */
   assigneeName(assignee: string): string {
     if (!assignee) return 'Sin asignar';
-    const member = this.groupMembers().find(u => u.id === assignee);
+    const member = this.allUsersList().find(u => u.id === assignee);
     return member?.full_name ?? assignee;
   }
 }

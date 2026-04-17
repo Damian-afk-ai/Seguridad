@@ -46,4 +46,48 @@
 .register-link a:hover {
     color: #0d9488;
     text-decoration: underline;
-}
+}
+
+/* ── Rate Limit UI ────────────────────────────────────────────────────────── */
+.rate-limit-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    color: #dc2626;
+    font-size: 0.85rem;
+    font-weight: 500;
+    animation: shake 0.4s ease-in-out;
+}
+
+.rate-limit-banner i {
+    font-size: 1.1rem;
+}
+
+.attempts-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    color: #b45309;
+    font-size: 0.8rem;
+}
+
+.attempts-warning i {
+    font-size: 0.95rem;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+}
+

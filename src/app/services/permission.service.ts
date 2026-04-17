@@ -1,6 +1,9 @@
 import { Injectable, inject, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../enviroments/enviroment';
 import { AuthService, Permission } from './auth.service';
-import { SupabaseService } from './supabase.service';
+import type { ApiResponse } from '../models/api-response.model';
 
 /**
  * PermissionService — Core de Seguridad (Frontend)
@@ -16,7 +19,8 @@ import { SupabaseService } from './supabase.service';
 @Injectable({ providedIn: 'root' })
 export class PermissionService {
   private auth = inject(AuthService);
-  private sb   = inject(SupabaseService);
+  private http = inject(HttpClient);
+  private api  = environment.apiUrl;
 
   // ── Signal derivada: lista de permisos actuales ─────────────────────────────
   /**
@@ -75,32 +79,35 @@ export class PermissionService {
   // ── Refresco manual de permisos ─────────────────────────────────────────────
 
   /**
-   * Recarga los permisos desde Supabase para un grupo determinado y actualiza
+   * Recarga los permisos desde el backend para un grupo determinado y actualiza
    * el Signal `currentUser` del AuthService, propagando la reactividad a toda
    * la UI (directivas, guards, templates, etc.).
    *
    * @param groupId  UUID del grupo cuyos permisos se consultarán.
    */
   async refreshPermissionsForGroup(groupId: string): Promise<void> {
-    const { data: permRows, error } = await this.sb.client
-      .from('permissions')
-      .select('resource, can_view, can_create, can_edit, can_delete')
-      .eq('group_id', groupId);
+    try {
+      const res = await firstValueFrom(
+        this.http.get<ApiResponse<any[]>>(`${this.api}/permissions/${groupId}`)
+      );
 
-    if (error || !permRows) {
-      console.error('[PermissionService] Error al refrescar permisos:', error?.message);
-      return;
-    }
+      if (!res.data) {
+        console.error('[PermissionService] Sin datos al refrescar permisos');
+        return;
+      }
 
-    const newPermissions = this.mapPermissions(permRows);
+      const newPermissions = this.mapPermissions(res.data);
 
-    // Actualizar el signal del AuthService (inmutably)
-    const currentUser = this.auth.currentUser();
-    if (currentUser) {
-      this.auth.currentUser.set({
-        ...currentUser,
-        permissions: newPermissions,
-      });
+      // Actualizar el signal del AuthService (inmutably)
+      const currentUser = this.auth.currentUser();
+      if (currentUser) {
+        this.auth.currentUser.set({
+          ...currentUser,
+          permissions: newPermissions,
+        });
+      }
+    } catch (err: any) {
+      console.error('[PermissionService] Error al refrescar permisos:', err.message);
     }
   }
 
